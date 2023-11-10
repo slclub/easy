@@ -6,16 +6,16 @@ import (
 	"github.com/slclub/easy/typehandle"
 )
 
-type WsTestMgr struct {
+type TCPTestMgr struct {
 	router route.Router
 	roles  []*Role
 	gate   *client.Gate
 }
 
-var WsMgr *WsTestMgr
+var TCPMgr *TCPTestMgr
 
-func NewWsTestMgr(gate *client.Gate) *WsTestMgr {
-	mgr := &WsTestMgr{
+func NewTCPTestMgr(gate *client.Gate) *TCPTestMgr {
+	mgr := &TCPTestMgr{
 		gate:   gate,
 		router: route.NewRouter(),
 	}
@@ -24,43 +24,44 @@ func NewWsTestMgr(gate *client.Gate) *WsTestMgr {
 	return mgr
 }
 
-func (self *WsTestMgr) Init() {
-	// create  two roles
+func (self *TCPTestMgr) Init() {
+	// create three roles
+	self.append(self.CreateRole())
 	self.append(self.CreateRole())
 	self.append(self.CreateRole())
 }
 
-func (self *WsTestMgr) CreateRole() *Role {
+func (self *TCPTestMgr) CreateRole() *Role {
 	role := NewRole()
-	cln := client.NewWsClient(self.gate, self.router)
+	cln := client.NewTCPClient(self.gate, self.router)
 	role.client = cln
 	return role
 }
 
-func (self *WsTestMgr) Run() {
+func (self *TCPTestMgr) Run() {
 
 	self.run()
 }
 
-func (self *WsTestMgr) run() {
+func (self *TCPTestMgr) run() {
 	for _, role := range self.roles {
 		role.ListenServ()
 	}
 }
 
-func (self *WsTestMgr) append(role *Role) {
+func (self *TCPTestMgr) append(role *Role) {
 	self.roles = append(self.roles, role)
 }
 
-func StartWs() {
+func StartTCP() {
 	// 初始化 客户端
-	WsMgr = NewWsTestMgr(&client.Gate{
+	TCPMgr = NewTCPTestMgr(&client.Gate{
 		Protocol:     typehandle.ENCRIPT_DATA_JSON,
-		Addr:         ":18080",
+		Addr:         ":18081",
 		LittleEndian: true,
 	})
 
-	WsMgr.Init()
-	InitWsRegister() // 注册消息ID 和路由
-	WsMgr.Run()
+	TCPMgr.Init()
+	InitTCPRegister() // 注册消息ID 和路由
+	TCPMgr.Run()
 }

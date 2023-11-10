@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	msgjson "simple_client/message/json"
 	"time"
 )
@@ -28,8 +29,14 @@ func sendMsgWithPeriod(roles []*Role) {
 }
 
 func sendMsgRoles(roles []*Role, msg any) {
-	for _, role := range roles {
-		role.Client().Agent().WriteMsg(msg)
+	if len(roles) == 0 {
+		return
 	}
-	fmt.Println("------ DO roles ", len(roles))
+	for _, role := range roles {
+		if role.Agent() == nil {
+			panic(any("agent of role is nil"))
+		}
+		role.Agent().WriteMsg(msg)
+	}
+	fmt.Println("------ DO roles ", len(roles), " client: ", reflect.TypeOf(roles[0].client).Elem().Name())
 }

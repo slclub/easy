@@ -1,20 +1,28 @@
 package main
 
 import (
-	"github.com/slclub/easy/client"
-	"github.com/slclub/easy/typehandle"
+	"os"
+	"os/signal"
 )
 
 func main() {
 
-	// 初始化 客户端
-	WsMgr = NewWsTestMgr(&client.Gate{
-		Protocol:     typehandle.ENCRIPT_DATA_JSON,
-		Addr:         ":18080",
-		LittleEndian: true,
-	})
+	StartWs()
+	StartTCP()
 
-	WsMgr.Init()
-	InitWsRegister() // 注册消息ID 和路由
-	WsMgr.Run()
+	// 业务逻辑入口
+	RunBusiniess()
+
+	wait()
+}
+
+func RunBusiniess() {
+	Do(WsMgr.roles)
+	Do(TCPMgr.roles)
+}
+
+func wait() {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, os.Kill)
+	<-c
 }

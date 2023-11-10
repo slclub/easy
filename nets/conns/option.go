@@ -21,7 +21,7 @@ type Option struct {
 	MinMsgLen uint32
 	MsgDigit  int
 	Encrypt   Encoder
-	MsgParser *msgParser
+	MsgParser FromConnReadWriter
 }
 
 func (self *Option) GetOption() *Option {

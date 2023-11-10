@@ -19,6 +19,10 @@ func NewTCPConn(conn net.Conn, pendingWriteNum int, option *Option) *TCPConn {
 	tcpConn.stopChan = make(chan struct{})
 	tcpConn.Option = option
 
+	if option.MsgParser == nil {
+		option.MsgParser = NewMsgParser()
+	}
+	tcpConn.Option.MsgParser.SetWithOption(option)
 	go tcpConn.LoopSend()
 
 	return tcpConn

@@ -14,7 +14,7 @@ import (
 // --------------
 type msgParser struct {
 	encode.Code
-	*Option
+	Option
 }
 
 func NewMsgParser() *msgParser {
@@ -27,7 +27,7 @@ func NewMsgParser() *msgParser {
 }
 
 // It's dangerous to call the method on reading or writing
-func (self *msgParser) SetMsgLen(option *Option) {
+func (self *msgParser) SetWithOption(option *Option) {
 	if option.MsgDigit > 0 {
 		self.MsgDigit = option.MsgDigit
 	}
@@ -110,3 +110,5 @@ func (self *msgParser) Write(conn *TCPConn, args []byte) error {
 
 	return nil
 }
+
+var _ FromConnReadWriter = &msgParser{}

@@ -17,15 +17,8 @@ type WSClient struct {
 // the second param is Router allow you set existed one.
 func NewWsClient(gate *Gate, rs ...route.Router) *WSClient {
 	// route init
-	var r route.Router
-	if len(rs) == 0 {
-		r = route.NewRouter()
-	} else {
-		r = rs[0]
-	}
-
 	self := &WSClient{}
-	self.router = r
+	self.router = autoRouter(rs)
 	self.Gate.Init(gate)
 
 	self.init()
@@ -52,10 +45,6 @@ func (self *WSClient) init() {
 	}
 	conn_ws := conns.NewWSConn(conn_origin, self.connOption, self.PendingWriteNum, self.MaxMsgLen)
 	self.agent = agent.NewAgent(conn_ws)
-}
-
-func (self *WSClient) Agent() agent.Agent {
-	return self.agent
 }
 
 func (self *WSClient) startBefore() {
@@ -86,4 +75,15 @@ func dealHandle(client *Client) agent.AgentHandle {
 			return
 		}
 	}
+}
+
+func autoRouter(rs []route.Router) route.Router {
+	// route init
+	var r route.Router
+	if len(rs) == 0 {
+		r = route.NewRouter()
+	} else {
+		r = rs[0]
+	}
+	return r
 }

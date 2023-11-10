@@ -16,6 +16,9 @@ func Init() {
 func InitJson() {
 	r1 := lservers.Server1().Router()
 	r1.Register(ID.LOGIN_RES, &json.LoginRes{}, nil)
+
+	r2 := lservers.Server2().Router()
+	r2.Register(ID.LOGIN_RES, &json.LoginRes{}, nil)
 }
 
 func InitProtobuf() {

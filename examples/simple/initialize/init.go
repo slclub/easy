@@ -24,4 +24,5 @@ func forServerInitialize() {
 	// registing messages to the Router of listening server
 	message.Init()
 	controller.InitBindingRoute()
+	controller.InitBindingRouteServer2()
 }

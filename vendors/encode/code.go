@@ -35,7 +35,7 @@ func (self *Code) Bytes2Uint(data []byte) uint16 {
 }
 
 func (self *Code) Uint322Bytes(mid uint32) []byte {
-	id_byte := make([]byte, 2)
+	id_byte := make([]byte, 4)
 	if self.littleEndian {
 		binary.LittleEndian.PutUint32(id_byte, mid)
 	} else {
