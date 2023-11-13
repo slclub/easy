@@ -89,7 +89,10 @@ r1.Register(ID.LOGIN_REQ, &json.LoginReq{}, typehandle.HandleMessage(login.Handl
 
 >### handle 
 
-Handle is a service listening and processing function.
+Handle is a listening service  and processing function.
+In the other word it's a controller(The C of MVC).
+
+It is an entry function of logical business.
 
 ```go
 import (
@@ -143,7 +146,7 @@ type DistributePlug interface {
 
 - Binding method
 
-The ```Binding(plugins ...any)``` method  can bind binder and encodersto Router. 
+The ```Binding(plugins ...any)``` method  can bind binder and encoder to Router. 
 So use this method to replace Binder and Encoder if you want to custom yourself.
 
 example:
@@ -153,9 +156,14 @@ r := Server1().Router()
 r.Binding(bind.NewBindJson(r.PathMap()), encode.NewJson(r.PathMap()))
 ```
 
+- PathMap
+
+This method return the storage for routing. Binder and Encoder should use it together. 
+
+
 > ### Encoder
 
-Encode/Decode transferred data. you can alose customize this component.
+Encode/Decode transferred data. you can also customize this component.
 By default, we support two typs : json and protobuf.
 
 - Interface
@@ -175,8 +183,8 @@ type Encoder interface {
 
 >### Binder
 
-It has two basic functions: binding Encoder and route functions.
-It corresponds one-to-one with the encoder.
+It has three basic functions: binding Encoder, binding handle and route functions.
+It corresponds one-to-one with the encoder. the methods of Register, RegisterHandle and Route will be called by Router
 
 - Interface
 
@@ -198,11 +206,90 @@ type RouteExecuter interface {
 ```
 
 
+
 ## ListenServers
+I had defined various servers followed by network protocol.
+
+Any of them can be New. so It is very convenient to use more than one servers in your project.
+Any instance servers can use different components. Also they can be customed.
+
+The Listen Server like a container of components, 
+enable smooth collaboration among various components to complete tasks.
+
+>### interface
+All of the servers should implement the interface of ```ListenServer```.
+They will all be used uniformly in the easy.Serv().
+
+```go
+
+import (
+    "github.com/slclub/easy/nets/agent"
+    "github.com/slclub/easy/route"
+)
+
+type ListenServer interface {
+    Init(*agent.Gate)
+    OnInit()
+    Router() route.Router
+    Start()
+    Hook() *hookAgent // agent 链接 回调
+    //OnClose(func())
+    Close()
+}
+```
+
+>### websocket
+
+- Name
+
+```
+WSServer
+```
+
+- Create
+
+```go
+// import github.com/slclub/easy/servers
+servers.NewWSServer()
+```
+
+
+>### TCP
+
+- Name
+
+```
+TCPServer
+```
+
+- Create
+
+```go
+// import github.com/slclub/easy/servers
+servers.NewTCPServer()
+```
+
+>### WEB
+
 ## Customize 
+
+### components:
+
+- Listen Server
+- Router
+- route.Binder
+- route.Encoder
+- net.Agent
+- conns.FromConnReadWriter
+- conns.Conn
+
+
 ## Open Packages
+Under Construction.
+
 ## NETS
 ## Examples
 ## Building With Docker
+Under Construction.
 ## Contribution
 ## License
