@@ -177,7 +177,7 @@ This method return the storage for routing. Binder and Encoder should use it tog
 > ### Encoder
 
 Encode/Decode transferred data. you can also customize this component.
-By default, we support two typs : json and protobuf.
+By default, we support two types : json and protobuf.
 
 - Interface
 
@@ -353,6 +353,9 @@ type Conn interface {
 
 
 ## Examples
+
+[Detail](!https://github.com/slclub/easy/tree/master/examples)
+
 ## Building With Docker
 Under Construction.
 ## Contribution
