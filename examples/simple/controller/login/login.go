@@ -6,7 +6,7 @@ import (
 	"simple/vendors/log8q"
 )
 
-func HandleLogin(agent agent.Agent, arg any) {
+func HandleLogin(agent1 agent.Agent, arg any) {
 
 	log8q.Log().Info("WS controller.Handle.Login info: ", reflect.TypeOf(arg).Elem().Name())
 }

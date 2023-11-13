@@ -94,6 +94,18 @@ In the other word it's a controller(The C of MVC).
 
 It is an entry function of logical business.
 
+- First Argument
+
+It is a Agent object. You just need to understand  like a link.
+
+- Second Argument
+
+It is a message that you defined. 
+
+Please used the Pointer type of Golang.
+
+- example
+
 ```go
 import (
     "github.com/slclub/easy/nets/agent"
@@ -101,8 +113,9 @@ import (
     "simple/vendors/log8q"
 )
 
-func HandleLogin(agent agent.Agent, arg any) {
+func HandleLogin(agent1 agent.Agent, arg any) {
     log8q.Log().Info("WS controller.Handle.Login info: ", reflect.TypeOf(arg).Elem().Name())
+    // agent1.WriteMsg(nil)
 }
 
 func HandleLoginTcp(agent2 agent.Agent, arg any) {
@@ -279,15 +292,66 @@ servers.NewTCPServer()
 - Router
 - route.Binder
 - route.Encoder
-- net.Agent
-- conns.FromConnReadWriter
-- conns.Conn
+- Agent Of Net
+- FromConnReadWriter of conns
+- Conn of conns
 
 
 ## Open Packages
 Under Construction.
 
 ## NETS
+
+>### agent.Agent
+
+When you send or recvive messages from client,you will need to use this.
+
+The first argment of the handle that registed in your Router is agent.Agent type.
+
+You will bind it to your own entity.
+
+```go
+type Agent interface {
+    WriteMsg(msg any)
+    LocalAddr() net.Addr
+    RemoteAddr() net.Addr
+    Close()
+    Destroy()
+    UserData() any
+    SetUserData(data any)
+    LoopRecv(handle AgentHandle)
+}
+```
+
+- Send Message
+
+```Agent.WriteMsg(msg any)```
+
+- Recive Message
+
+Will be called by Router Excuter. So we do not need to care about it.
+
+The handle functions is the processor that receives messages.
+
+
+>### conns.Conn
+
+It is does not matter with the logical business. Just open for framework customed.
+
+```go
+type Conn interface {
+    ReadMsg() ([]byte, error)
+    WriteMsg(args []byte) error
+    LocalAddr() net.Addr
+    RemoteAddr() net.Addr
+    Close()
+    Destroy()
+    Done() chan struct{}
+    GetOption() *Option
+}
+```
+
+
 ## Examples
 ## Building With Docker
 Under Construction.
