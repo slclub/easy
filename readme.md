@@ -354,9 +354,13 @@ type Conn interface {
 
 ## Examples
 
-[Detail](!https://github.com/slclub/easy/tree/master/examples)
+[Detail](https://github.com/slclub/easy/tree/master/examples/)
 
 ## Building With Docker
 Under Construction.
 ## Contribution
 ## License
+
+Copyright (c) 2023 许亚军
+
+[MIT](https://github.com/slclub/easy/blob/master/LICENSE)
