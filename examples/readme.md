@@ -62,7 +62,7 @@
 
 grpc的服务端，使用easy.rpc 只需要简短的代码就可以构筑，rpc应用服务端。
 
-服务端配置ETCD
+- 服务端配置ETCD
 
 ```go
     // 配置ETCD服务
@@ -72,7 +72,10 @@ grpc的服务端，使用easy.rpc 只需要简短的代码就可以构筑，rpc�
 	
 ```
 
-服务端配置grpc
+- 服务端配置grpc
+
+业务接口注册需要在Serv()监听之前去注册。
+
 ```go	
     // New 一个rpc 监听服务
     server := cgrpc.NewServer(&cgrpc.Config{
@@ -93,7 +96,7 @@ grpc的服务端，使用easy.rpc 只需要简短的代码就可以构筑，rpc�
     server.Serv()
 ```
 
-业务接口
+- 业务接口
 
 ```go
 // server is used to implement helloworld.GreeterServer.
@@ -133,6 +136,10 @@ var (
 
 - grpc 客户端配置
 
+代码中client对象是需要全局暴漏（public）。handle调用部分可以写在任意地方，是与原生grpc调用一样的，只要在ClientConn的有效生命周期内通信调用即可。
+
+使用匿名函数封装可以避免暴漏全局变量，但为了兼容grpc使用习惯，就没有去封装。
+
 ```go
     client := cgrpc.NewClient("server1", namespace, "")
     client.Start()
@@ -147,6 +154,9 @@ var (
 ```
 
 - handle 业务处理
+
+handle 写这十几行，其实为了压力测试，持续性测试等。
+
 
 ```go
 func handle(clientConn grpc.ClientConnInterface) {
@@ -169,6 +179,15 @@ func handle(clientConn grpc.ClientConnInterface) {
     }
 
 }
+```
+
+仅仅是这2句是用的grpc，也是核心调用，其他的是多余的
+```go
+    c := helloworld.NewGreeterClient(clientConn)
+    resp1, err := c.SayHello(
+        context.Background(),
+        &helloworld.HelloRequest{Name: fmt.Sprintf("xiaoming-%d", i)},
+    )
 ```
 
 ---

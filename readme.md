@@ -356,8 +356,17 @@ type Conn interface {
 
 The easy framework program integrates GRPC and ETCD. constitutes a complete service discovery and distributed RPC communication server architecture.
 
+easy
+
 [tutorials and example](https://github.com/slclub/easy/tree/master/examples#RPC)
 
+[ETCD with docker](https://github.com/slclub/easy/blob/master/docs/etcd.md)
+
+[grpc-go 官网](https://grpc.io/docs/languages/go/)
+
+[etcd 官网](https://etcd.io/docs/)
+
+docker image (```quay.io/coreos/etcd```). Ofcourse, you can used any image according to your preferences.  
 
 ## Examples
 
