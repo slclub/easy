@@ -65,7 +65,7 @@ func (self *Server) Serv(opts ...grpc.ServerOption) {
 	//
 
 	// start listening rpc server terminal.
-	log.Info("GRPC server start the rpc")
+	log.Info("GRPC server start the listening service of RPC.")
 	err = self.server.Serve(listener)
 	if err != nil {
 		log.Fatal("GRPC clust Serv error:", err)

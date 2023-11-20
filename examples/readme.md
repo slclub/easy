@@ -1,7 +1,9 @@
-## Program examples
+# Program examples
 用easy 实现的 服务端 和客户端样例
 
->### simple
+## $simple
+
+### simple
 
 比较简单的源码样例；
 
@@ -36,6 +38,133 @@
 ```
 
 
->### simple_client
+### simple_client
 
 明显是simple 对应的客户端测试代码
+
+## $RPC
+
+我们使用的grpc和etcd，构成了一个完整的服务发现模式。可以轻松实现稳定分层，分布式架构的服务。
+
+代码中出现的namespace 与 scheme 是同一个概念。
+
+这介绍的简单教程，详细运行代码可以看example/rpc 的源码。
+
+### helloworld
+ 
+这个子package 是官方的一个 接口定义的例子。也是最简单最easy的一个例子。
+这里对接的grpc服务与你自己的业务代码结合的通道接口。与MVC 中 C 是一个位置，
+它属于业务应用类代码。
+
+### server
+
+grpc的服务端，使用easy.rpc 只需要简短的代码就可以构筑，rpc应用服务端。
+
+服务端配置ETCD
+
+```go
+    // 配置ETCD服务
+    eoption := &etcd.Option{}
+    eoption.Conv(etcdAddr)
+    etcd.NewWithOption(eoption)
+	
+```
+
+服务端配置grpc
+```go	
+    // New 一个rpc 监听服务
+    server := cgrpc.NewServer(&cgrpc.Config{
+        Name:      "server1",
+        Addr:      serverAddr,
+        Namespace: namespace,
+    })
+    
+    // 绑定业务接口到 rpc服务
+    // 可以被多次使用RegisterService，我们用的append
+    server.RegisterService(
+        func(server *grpc.Server) {
+            helloworld.RegisterGreeterServer(server, &hello{})
+        },
+    )
+    
+    // 监听；如果您有主监听接口，那么可以用go 并发运行
+    server.Serv()
+```
+
+业务接口
+
+```go
+// server is used to implement helloworld.GreeterServer.
+type hello struct {
+    helloworld.UnimplementedGreeterServer
+}
+
+// SayHello implements helloworld.GreeterServer
+func (s *hello) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*helloworld.HelloReply, error) {
+    log.Info("Received: %v", in.GetName())
+    return &helloworld.HelloReply{Message: "Hello " + in.GetName()}, nil
+}
+```
+
+### client
+
+grpc的客户端；load balance 是在客户端实现的.
+
+
+```go
+var (
+	etcdAddr  string = "123.57.25.243:12379"
+	namespace        = "easy"
+)
+```
+
+- ETCD 初始化
+
+与服务端一样的
+
+```go
+    eoption := &etcd.Option{}
+    eoption.Conv(etcdAddr)
+    etcd.NewWithOption(eoption)
+
+```
+
+- grpc 客户端配置
+
+```go
+    client := cgrpc.NewClient("server1", namespace, "")
+    client.Start()
+    
+    // do your things
+    handle(client.ClientConn)
+    // just for test
+    client.Wait()
+    
+    // close
+    client.Close()
+```
+
+- handle 业务处理
+
+```go
+func handle(clientConn grpc.ClientConnInterface) {
+    c := helloworld.NewGreeterClient(clientConn)
+    ticker := time.NewTicker(2 * time.Second)
+    i := 1
+    for range ticker.C {
+    
+        resp1, err := c.SayHello(
+            context.Background(),
+            &helloworld.HelloRequest{Name: fmt.Sprintf("xiaoming-%d", i)},
+        )
+        if err != nil {
+            log.Fatal("SayHello call error：%v", err)
+            continue
+        }
+        log.Info("SayHello Response：%s\n", resp1.Message)
+    
+        i++
+    }
+
+}
+```

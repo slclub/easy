@@ -17,6 +17,7 @@ so,in addition to using default rules, you can also choose your own rules, but y
 - [Customize](#Customize)
 - [Open Packages](#Open-packages)
 - [NETS](#NETS)
+- [RPC and discovery](#RPC)
 - [Examples](#Examples)
 - [Building With Docker](#Building-With-Docker)
 - [Contribution](#Contribution)
@@ -350,6 +351,12 @@ type Conn interface {
     GetOption() *Option
 }
 ```
+
+## RPC
+
+The easy framework program integrates GRPC and ETCD. constitutes a complete service discovery and distributed RPC communication server architecture.
+
+[tutorials and example](https://github.com/slclub/easy/tree/master/examples#$RPC)
 
 
 ## Examples

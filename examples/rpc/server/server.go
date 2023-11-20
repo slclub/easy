@@ -27,21 +27,26 @@ func (s *hello) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*hel
 }
 
 func main() {
+	// 配置ETCD服务
 	eoption := &etcd.Option{}
 	eoption.Conv(etcdAddr)
 	etcd.NewWithOption(eoption)
 
+	// New 一个rpc 监听服务
 	server := cgrpc.NewServer(&cgrpc.Config{
 		Name:      "server1",
 		Addr:      serverAddr,
 		Namespace: namespace,
 	})
 
+	// 绑定业务接口到 rpc服务
+	// 可以被多次使用RegisterService，我们用的append
 	server.RegisterService(
 		func(server *grpc.Server) {
 			helloworld.RegisterGreeterServer(server, &hello{})
 		},
 	)
 
+	// 监听；如果您有主监听接口，那么可以用go 并发运行
 	server.Serv()
 }
