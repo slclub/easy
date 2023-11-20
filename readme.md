@@ -356,7 +356,7 @@ type Conn interface {
 
 The easy framework program integrates GRPC and ETCD. constitutes a complete service discovery and distributed RPC communication server architecture.
 
-[tutorials and example](https://github.com/slclub/easy/tree/master/examples#$RPC)
+[tutorials and example](https://github.com/slclub/easy/tree/master/examples#RPC)
 
 
 ## Examples

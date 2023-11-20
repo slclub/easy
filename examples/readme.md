@@ -1,7 +1,7 @@
 # Program examples
 用easy 实现的 服务端 和客户端样例
 
-## $simple
+## Simple
 
 ### simple
 
@@ -42,7 +42,9 @@
 
 明显是simple 对应的客户端测试代码
 
-## $RPC
+---
+
+## RPC
 
 我们使用的grpc和etcd，构成了一个完整的服务发现模式。可以轻松实现稳定分层，分布式架构的服务。
 
@@ -168,3 +170,5 @@ func handle(clientConn grpc.ClientConnInterface) {
 
 }
 ```
+
+---
