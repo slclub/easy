@@ -308,7 +308,7 @@ so, you could use it anywhere if does not worry about the performance of your pr
 
 The main focus is convenience and powerful functionality.
 
-- Using
+#### 1. Using
 
 ```go get github.com/slclub/easy/vendors/option```
 
@@ -336,8 +336,6 @@ client := cgrpc.NewClient(option.OptionWith(&struct {
     Namespace string
 }{"server1", namespace}))
 ```
-
---- 
 
 - Example 3
 
@@ -375,7 +373,7 @@ When you need to invoke it, you can just use  fields or methods of the struct to
     etcd.NewWithOption(option.OptionWith(eoption).Default(option.DEFAULT_IGNORE_ZERO))
 ```
 
-### Rules
+#### 2. Rules
 
 - The target object ```option.Target(object)``` must be an struct pointer. 
 if it is not a pointer you should use ```&``` (take address symbol).
@@ -385,7 +383,8 @@ if it is not a pointer you should use ```&``` (take address symbol).
 - Both of fields or methods in source object are allowed to initializing the target object, If it can match.
 - The source object can be nil.
 
-Valid assignment
+example:
+- Valid assignment
 
 ```go
 target.name  = source.Name
@@ -394,7 +393,7 @@ target.name  = source.Name() string
 target.Name  = source.Name() string
 ```
 
-Unvalid
+- Unvalid
 
 ```go
 target.name  != source.name
@@ -404,13 +403,16 @@ target.Name  != source.name() string
 target.Name  != source.NameX
 ```
 
-### Configure Part of Option
+
+#### 3. Configure Part of Option
 
 - Default; (use one or more OptionFunc to initialize the target object)
 - Source; Object (config object)
 - Final; (use one or more OptionFunc to nitializing)
 
 Final is the last execution. so the value of target field must be same with the value comed from Final. 
+
+---- 
 
 ## NETS
 
