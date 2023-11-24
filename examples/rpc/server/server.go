@@ -6,7 +6,9 @@ import (
 	"github.com/slclub/easy/log"
 	cgrpc "github.com/slclub/easy/rpc/cgrpc"
 	"github.com/slclub/easy/rpc/etcd"
+	"github.com/slclub/easy/vendors/option"
 	"google.golang.org/grpc"
+	"strings"
 )
 
 var (
@@ -27,17 +29,22 @@ func (s *hello) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*hel
 }
 
 func main() {
-	// 配置ETCD服务
-	eoption := &etcd.Option{}
-	eoption.Conv(etcdAddr)
-	etcd.NewWithOption(eoption)
+	// setting ETCD service
+	// eoption := &etcd.Option{}
+	// eoption.Conv(etcdAddr)
+	etcd.NewWithOption(option.OptionWith(nil).Default(
+		option.OptionFunc(func() (string, any) {
+			return "Endpoints", strings.Split(etcdAddr, ";")
+		})),
+	)
 
 	// New 一个rpc 监听服务
-	server := cgrpc.NewServer(&cgrpc.Config{
+	server := cgrpc.NewServer(option.OptionWith(&cgrpc.Config{
 		Name:      "server1",
 		Addr:      serverAddr,
 		Namespace: namespace,
-	})
+		//TTL:       15,
+	}).Default(option.DEFAULT_IGNORE_ZERO))
 
 	// 绑定业务接口到 rpc服务
 	// 可以被多次使用RegisterService，我们用的append
@@ -47,6 +54,6 @@ func main() {
 		},
 	)
 
-	// 监听；如果您有主监听接口，那么可以用go 并发运行
+	// 监听；如果您有主监听，那么可以用go 并发运行
 	server.Serv()
 }

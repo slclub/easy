@@ -7,7 +7,9 @@ import (
 	"github.com/slclub/easy/log"
 	"github.com/slclub/easy/rpc/cgrpc"
 	"github.com/slclub/easy/rpc/etcd"
+	"github.com/slclub/easy/vendors/option"
 	"google.golang.org/grpc"
+	"strings"
 	"time"
 )
 
@@ -17,11 +19,23 @@ var (
 )
 
 func main() {
-	eoption := &etcd.Option{}
-	eoption.Conv(etcdAddr)
-	etcd.NewWithOption(eoption)
+	// plan1
+	//eoption := &etcd.Option{}
+	//eoption.Conv(etcdAddr)
+	//etcd.NewWithOption(option.OptionWith(eoption).Default(option.DEFAULT_IGNORE_ZERO))
 
-	client := cgrpc.NewClient("server1", namespace, "")
+	// plan2 using the default value setting function.
+	etcd.NewWithOption(option.OptionWith(nil).Default(
+		option.OptionFunc(func() (string, any) {
+			return "Endpoints", strings.Split(etcdAddr, ";")
+		}),
+	))
+
+	client := cgrpc.NewClient(option.OptionWith(&struct {
+		Name      string
+		Namespace string
+	}{"server1", namespace}))
+
 	client.Start()
 
 	// do your things
@@ -31,6 +45,14 @@ func main() {
 
 	// close
 	client.Close()
+}
+
+func optionChoice() any {
+	opt := struct {
+		Endpoints []string
+	}{}
+	opt.Endpoints = strings.Split(etcdAddr, ";")
+	return opt
 }
 
 func handle(clientConn grpc.ClientConnInterface) {

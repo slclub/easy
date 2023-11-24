@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/slclub/easy/log"
 	"github.com/slclub/easy/rpc/etcd"
+	"github.com/slclub/easy/vendors/option"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -38,16 +39,16 @@ example :
 	c.SyaHello()
 */
 
-func NewClient(name, space, balance string) *Client {
-	if balance == "" {
-		balance = "round_robin"
+func NewClient(assignment option.Assignment) *Client {
+	cli := &Client{
+		wait: make(chan os.Signal),
 	}
-	return &Client{
-		Name:        name,
-		Namespace:   space,
-		DialBalance: balance,
-		wait:        make(chan os.Signal),
-	}
+	assignment.Target(cli)
+	assignment.Default(option.OptionFunc(func() (string, any) {
+		return "DialBalance", "round_robin"
+	}))
+	assignment.Apply()
+	return cli
 }
 
 // you should run it with go command.

@@ -18,7 +18,7 @@ type Option struct {
 	AutoSyncInterval time.Duration `json:"auto-sync-interval"`
 
 	// DialTimeout is the timeout for failing to establish a connection.
-	DialTimeout time.Duration `json:"dial-timeout"`
+	//DialTimeout time.Duration `json:"dial-timeout"`
 
 	// DialKeepAliveTime is the time after which client pings the server to see if
 	// transport is alive.

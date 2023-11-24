@@ -52,6 +52,8 @@
 
 这介绍的简单教程，详细运行代码可以看example/rpc 的源码。
 
+[ETCD with docker](https://github.com/slclub/easy/blob/master/docs/etcd.md)
+
 ### helloworld
  
 这个子package 是官方的一个 接口定义的例子。也是最简单最easy的一个例子。
@@ -61,6 +63,14 @@
 ### server
 
 grpc的服务端，使用easy.rpc 只需要简短的代码就可以构筑，rpc应用服务端。
+
+- run 
+
+运行前先修改下etcd 的地址；集群多个etcd地址用分号隔开即可。为了运行命令简便，这里并没有使用flag等。
+
+先跳转到 ```cd examples/rpc/server```
+
+运行 ```go build && ./server ```
 
 - 服务端配置ETCD
 
@@ -115,10 +125,21 @@ func (s *hello) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*hel
 
 grpc的客户端；load balance 是在客户端实现的.
 
+- run
+
+这里与server 是一样的，修改下etcd 地址即可
+
+跳转到项目目录：
+```cd examples/rpc/client```
+
+运行：
+```go build && ./client```
+
+- 变量
 
 ```go
 var (
-	etcdAddr  string = "123.57.25.243:12379"
+	etcdAddr  string = "127.0.0.1:12379"
 	namespace        = "easy"
 )
 ```
@@ -128,10 +149,17 @@ var (
 与服务端一样的
 
 ```go
-    eoption := &etcd.Option{}
-    eoption.Conv(etcdAddr)
-    etcd.NewWithOption(eoption)
-
+    // plan 1
+    //eoption := &etcd.Option{}
+    //eoption.Conv(etcdAddr)
+    //etcd.NewWithOption(eoption)
+	
+    // plan2
+    etcd.NewWithOption(option.OptionWith(nil).Default(
+        option.OptionFunc(func() (string, any) {
+        return "Endpoints", strings.Split(etcdAddr, ";")
+        })),
+    )
 ```
 
 - grpc 客户端配置
@@ -141,7 +169,11 @@ var (
 使用匿名函数封装可以避免暴漏全局变量，但为了兼容grpc使用习惯，就没有去封装。
 
 ```go
-    client := cgrpc.NewClient("server1", namespace, "")
+    client := cgrpc.NewClient(option.OptionWith(&struct {
+        Name      string
+        Namespace string
+    }{"server1", namespace}))
+	
     client.Start()
     
     // do your things

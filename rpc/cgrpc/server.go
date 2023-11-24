@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/slclub/easy/log"
 	"github.com/slclub/easy/rpc/etcd"
+	"github.com/slclub/easy/vendors/option"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"net"
@@ -28,18 +29,17 @@ type Server struct {
 	greeterHandle []func(*grpc.Server)
 }
 
-func NewServer(conf *Config) *Server {
-	if conf.TTL <= 0 {
-		conf.TTL = 15
-	}
-	return &Server{
-		Name:          conf.Name,
-		Addr:          conf.Addr,
-		TTL:           conf.TTL,
-		Namespace:     conf.Namespace,
+func NewServer(assignment option.Assignment) *Server {
+	ser := &Server{
 		wait:          make(chan os.Signal),
 		greeterHandle: []func(*grpc.Server){},
 	}
+	assignment.Target(ser)
+	assignment.Default(option.OptionFunc(func() (string, any) {
+		return "TTL", 15
+	}))
+	assignment.Apply()
+	return ser
 }
 
 // suitable grpc option configration

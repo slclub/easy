@@ -4,6 +4,7 @@ package etcd
 
 import (
 	"github.com/slclub/easy/log"
+	"github.com/slclub/easy/vendors/option"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"time"
 )
@@ -18,16 +19,20 @@ func EClient() *clientv3.Client {
 	return ecli
 }
 
-func NewWithOption(option *Option) {
+func NewWithOption(assignment option.Assignment) {
 	var err error
-	timeout := option.DialTimeout
-	if timeout <= 0 {
-		timeout = CONNECTION_ETCD_TIMEOUT_DEFAULT * time.Second
-	}
-	ecli, err = clientv3.New(clientv3.Config{
-		Endpoints:   option.Endpoints,
-		DialTimeout: timeout,
-	})
+
+	v3config := clientv3.Config{}
+	assignment.Target(&v3config)
+	// set target default value
+	// please running it before Apply() method.
+	assignment.Default(option.OptionFunc(func() (string, any) {
+		return "DialTimeout", CONNECTION_ETCD_TIMEOUT_DEFAULT * time.Second
+	}))
+
+	assignment.Apply()
+
+	ecli, err = clientv3.New(v3config)
 	if err != nil {
 		log.Fatal("[ETCD] client created error")
 		return
