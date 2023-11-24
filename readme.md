@@ -1,5 +1,5 @@
 # EASY  FRAMEWORK
-[![license](https://img.shields.io/badge/License-MIT_2023-blue%20)](https://github.com/slclub/easy/blob/master/LICENSE)
+[![license](https://img.shields.io/badge/License-MIT_2023-blue)](https://github.com/slclub/easy/blob/master/LICENSE)
 
 ## Summary
 
