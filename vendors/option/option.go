@@ -294,25 +294,25 @@ func (self *Option) setReflectValue(target reflect.Value, value reflect.Value) {
 		if self.force && value.IsZero() {
 			return
 		}
-		target.SetString(value.String())
+		target.SetString(value.Convert(target.Type()).String())
 
 	case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8:
 		if self.force && value.IsZero() {
 			return
 		}
-		target.SetInt(value.Int())
+		target.SetInt(value.Convert(target.Type()).Int())
 
 	case reflect.Uint, reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8:
 		if self.force && value.IsZero() {
 			return
 		}
-		target.SetUint(value.Uint())
+		target.SetUint(value.Convert(target.Type()).Uint())
 
 	case reflect.Float64, reflect.Float32:
 		if self.force && value.IsZero() {
 			return
 		}
-		target.SetFloat(value.Float())
+		target.SetFloat(value.Convert(target.Type()).Float())
 
 	default:
 		target.Set(value)

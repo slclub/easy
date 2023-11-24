@@ -1,12 +1,12 @@
 package servers
 
 import (
-	"github.com/slclub/easy/nets/agent"
 	"github.com/slclub/easy/route"
+	"github.com/slclub/easy/vendors/option"
 )
 
 type ListenServer interface {
-	Init(*agent.Gate)
+	Init(assignment option.Assignment)
 	OnInit()
 	Router() route.Router
 	Start()

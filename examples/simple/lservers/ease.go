@@ -4,6 +4,7 @@ import (
 	"github.com/slclub/easy/nets/agent"
 	"github.com/slclub/easy/servers"
 	"github.com/slclub/easy/typehandle"
+	"github.com/slclub/easy/vendors/option"
 )
 
 var (
@@ -38,20 +39,20 @@ func Server2() servers.ListenServer {
 func InitListenServer() {
 	server1 = servers.NewWSServer()
 
-	server1.Init(&agent.Gate{
+	server1.Init(option.OptionWith(&agent.Gate{
 		Addr:            ":18080",
 		Protocol:        typehandle.ENCRIPT_DATA_JSON,
 		PendingWriteNum: 2000,
 		LittleEndian:    true,
 		MaxConnNum:      2000,
-	})
+	}).Default(option.DEFAULT_IGNORE_ZERO))
 
 	server2 = servers.NewTCPServer()
-	server2.Init(&agent.Gate{
+	server2.Init(option.OptionWith(&agent.Gate{
 		Addr:            ":18081",
 		Protocol:        typehandle.ENCRIPT_DATA_JSON,
 		PendingWriteNum: 2000,
 		LittleEndian:    true,
 		MaxConnNum:      2000,
-	})
+	}).Default(option.DEFAULT_IGNORE_ZERO))
 }

@@ -2,6 +2,7 @@ package servers
 
 import (
 	"github.com/slclub/easy/nets/agent"
+	"github.com/slclub/easy/vendors/option"
 	"testing"
 )
 
@@ -10,7 +11,7 @@ func TestConnSet(t *testing.T) {
 		conns:  make(ConnSet),
 		server: &NewWSServer().Server,
 	}
-	cs.server.Init(&agent.Gate{})
+	cs.server.Init(option.OptionWith(&agent.Gate{}).Default(option.DEFAULT_IGNORE_ZERO))
 	a, b, c := 1, 2, 3
 	adderr := cs.Add(&a)
 	cs.Add(&b)
@@ -30,7 +31,7 @@ func TestConnSetWithTCP(t *testing.T) {
 		conns:  make(ConnSet),
 		server: &NewTCPServer().Server,
 	}
-	cs.server.Init(&agent.Gate{})
+	cs.server.Init(option.OptionWith(&agent.Gate{}).Default(option.DEFAULT_IGNORE_ZERO))
 	a, b, c := 1, 2, 3
 	adderr := cs.Add(&a)
 	cs.Add(&b)

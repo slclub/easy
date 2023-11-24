@@ -10,9 +10,11 @@ import (
 	"github.com/slclub/easy/route/bind"
 	"github.com/slclub/easy/route/encode"
 	"github.com/slclub/easy/typehandle"
+	"github.com/slclub/easy/vendors/option"
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 /**
@@ -27,12 +29,34 @@ type Server struct {
 	connOption *conns.Option
 }
 
-func (self *Server) Init(gate *agent.Gate) {
-	self.Gate.Init(gate)
-	if self.Protocol == "" {
-		self.Protocol = typehandle.EnCriPT_DATA_PROTOBUF
-	}
+func (self *Server) Init(assignment option.Assignment) {
+	//self.Gate.Init(gate)
+	assignment.Target(&self.Gate)
+	assignment.Default(
+		option.OptionFunc(func() (string, any) {
+			return "Protocol", typehandle.EnCriPT_DATA_PROTOBUF
+		}),
+		option.OptionFunc(func() (string, any) {
+			return "MaxConnNum", 100
+		}),
+		option.OptionFunc(func() (string, any) {
+			return "PendingWriteNum", 100
+		}),
+		option.OptionFunc(func() (string, any) {
+			return "MaxMsgLen", 4096
+		}),
+		option.OptionFunc(func() (string, any) {
+			return "HTTPTimeout", 10 * time.Second
+		}),
+		option.OptionFunc(func() (string, any) {
+			return "MsgDigit", conns.CONST_MSG_DIGIT
+		}),
+	)
 
+	//if self.Protocol == "" {
+	//	self.Protocol = typehandle.EnCriPT_DATA_PROTOBUF
+	//}
+	assignment.Apply()
 	self.defaultRouteEncripty()
 	self.Router().Encoder().LittleEndian(self.LittleEndian)
 }
