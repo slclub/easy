@@ -10,18 +10,20 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/resolver"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 )
 
+/*
+common balance cluster
+the balance was desided by grpc
+*/
 type Client struct {
-	Name        string
+	pathName    string
 	Namespace   string
 	DialBalance string // default:round_robin
 	ClientConn  *grpc.ClientConn
-	wait        chan os.Signal
-	url         string
+	waiter
+	url string
 }
 
 // resolver
@@ -41,7 +43,7 @@ example :
 
 func NewClient(assignment option.Assignment) *Client {
 	cli := &Client{
-		wait: make(chan os.Signal),
+		waiter: waiter{make(chan os.Signal)},
 	}
 	assignment.Target(cli)
 	assignment.Default(option.OptionFunc(func() (string, any) {
@@ -59,7 +61,7 @@ func (self *Client) Start() {
 	var err error
 
 	// init default dial url
-	self.DialUrl(rs.Scheme() + "://author/" + self.Name)
+	self.DialUrl(rs.Scheme() + "://author/" + self.pathName)
 
 	// get conn
 	self.ClientConn, err = self.Dial(
@@ -84,12 +86,7 @@ func (self *Client) Dial(target string, opts ...grpc.DialOption) (*grpc.ClientCo
 
 func (self *Client) Close() {
 	self.ClientConn.Close()
-	defer signal.Stop(self.wait)
-}
-
-func (self *Client) Wait() {
-	signal.Notify(self.wait, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT)
-	<-self.wait
+	defer self.waiter.close()
 }
 
 func (self *Client) DialUrl(urls ...string) string {
@@ -142,6 +139,7 @@ func (self *etcdResolver) watch(pathPrefix string) {
 
 	state := resolver.State{Addresses: addrList}
 	self.conn.UpdateState(state)
+	log.Info("etcd path prefix %v", pathPrefix)
 
 	// 监听服务列表
 	watchChan := etcd.EClient().Watch(context.Background(), pathPrefix, clientv3.WithPrefix())

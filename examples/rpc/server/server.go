@@ -40,11 +40,19 @@ func main() {
 
 	// New 一个rpc 监听服务
 	server := cgrpc.NewServer(option.OptionWith(&cgrpc.Config{
-		Name:      "server1",
+		PathName:  "server1",
 		Addr:      serverAddr,
 		Namespace: namespace,
 		//TTL:       15,
-	}).Default(option.DEFAULT_IGNORE_ZERO))
+	}).Default(
+		option.DEFAULT_IGNORE_ZERO,
+		option.OptionFunc(func() (string, any) {
+			return "ID", "abluo"
+		}),
+		option.OptionFunc(func() (string, any) {
+			return "AddrToClient", "127.0.0.1:18080"
+		}),
+	))
 
 	// 绑定业务接口到 rpc服务
 	// 可以被多次使用RegisterService，我们用的append

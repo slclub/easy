@@ -13,25 +13,25 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 	"time"
 )
 
 type Server struct {
-	Name          string
-	Addr          string
-	TTL           int64
-	Namespace     string
-	server        *grpc.Server
-	wait          chan os.Signal
+	ID           string
+	pathName     string
+	Addr         string
+	AddrToClient string
+	TTL          int64
+	Namespace    string
+	server       *grpc.Server
+	waiter
 	greeterHandle []func(*grpc.Server)
 }
 
 func NewServer(assignment option.Assignment) *Server {
 	ser := &Server{
-		wait:          make(chan os.Signal),
+		waiter:        waiter{make(chan os.Signal)},
 		greeterHandle: []func(*grpc.Server){},
 	}
 	assignment.Target(ser)
@@ -81,10 +81,7 @@ func (self *Server) RegisterService(caller func(server *grpc.Server)) {
 }
 
 func (self *Server) exitHandle() {
-	signal.Notify(self.wait, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT)
-	<-self.wait
-	defer signal.Stop(self.wait)
-
+	self.waiter.close()
 	self.Delete()
 	//if i, ok := r.(syscall.Signal); ok {
 	//	os.Exit(i)
@@ -95,23 +92,28 @@ func (self *Server) exitHandle() {
 
 func (self *Server) register() {
 	ticker := time.NewTicker(time.Second * time.Duration(self.TTL))
-	key := self.pathKey(self.Name, self.Addr)
 	defer ticker.Stop()
+
+	// do while
 	for {
+		self.registerSoon()
 		<-ticker.C
-		resp, err := etcd.EClient().Get(context.Background(), key)
-		if err != nil {
-			log.Fatal("GRPC get server info from etcd error:%v", err)
-			continue
-		}
-		// 已注册
-		if resp.Count > 0 {
-			continue
-		}
-		err = self.keepAlive()
-		if err != nil {
-			log.Fatal("GRPC keep alive error:%v", err)
-		}
+	}
+}
+
+func (self *Server) registerSoon() {
+	resp, err := etcd.EClient().Get(context.Background(), self.pathKey(self.pathName, self.Addr))
+	if err != nil {
+		log.Fatal("GRPC get server info from etcd error:%v", err)
+		return
+	}
+	// 已注册
+	if resp.Count > 0 {
+		return
+	}
+	err = self.keepAlive()
+	if err != nil {
+		log.Fatal("GRPC keep alive error:%v", err)
 	}
 }
 
@@ -123,12 +125,13 @@ func (self *Server) keepAlive() error {
 	}
 
 	// register the service to etcd.
-	key := self.pathKey(self.Name, self.Addr)
-	_, err = etcd.EClient().Put(context.Background(), key, self.Addr, clientv3.WithLease(leaseResp.ID))
+	key := self.pathKey(self.pathName, self.Addr)
+
+	_, err = etcd.EClient().Put(context.Background(), key, self.pathValue(self.Addr, self.AddrToClient, self.GetID()), clientv3.WithLease(leaseResp.ID))
 	if err != nil {
 		return err
 	}
-	log.Info("GRPC havs successfully registered it to etcd")
+	log.Info("GRPC havs successfully registered it to etcd %v", key)
 
 	// keep alive with etcd
 	channelLeaseAlive, err := etcd.EClient().KeepAlive(context.Background(), leaseResp.ID)
@@ -146,6 +149,26 @@ func (self *Server) keepAlive() error {
 	return nil
 }
 
+func (self *Server) pathValue(args ...string) string {
+	value := ""
+	for i, v := range args {
+		if i == 0 {
+			value += v
+			continue
+		}
+		value += ";" + v
+	}
+	//log.Fatal("-------------- %v", value)
+	return value
+}
+
+func (self *Server) GetID() string {
+	if self.ID == "" {
+		return self.Addr
+	}
+	return self.ID
+}
+
 func (self *Server) pathKey(args ...string) string {
 	if len(args) == 0 {
 		return ""
@@ -155,5 +178,5 @@ func (self *Server) pathKey(args ...string) string {
 }
 
 func (self *Server) Delete() {
-	etcd.EClient().Delete(context.Background(), self.pathKey(self.Name, self.Addr))
+	etcd.EClient().Delete(context.Background(), self.pathKey(self.pathName, self.Addr))
 }

@@ -32,7 +32,7 @@ func main() {
 	))
 
 	client := cgrpc.NewClient(option.OptionWith(&struct {
-		Name      string
+		PathName  string
 		Namespace string
 	}{"server1", namespace}))
 
