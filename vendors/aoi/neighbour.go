@@ -1,7 +1,6 @@
 package aoi
 
 import (
-	"github.com/slclub/easy/log"
 	"github.com/slclub/easy/vendors/option"
 	"github.com/slclub/go-tips/spinlock"
 	"sync"
@@ -19,6 +18,8 @@ const (
 	NEIGHBOUR_CLEAN = "clean"
 )
 
+type NeighbourConfigFunc func(collection *neighbourCollection)
+
 // 视野区域集合
 type neighbourCollection struct {
 	master          Entity        //操作的主对象指针
@@ -27,19 +28,23 @@ type neighbourCollection struct {
 	opt             *Option
 }
 
-func NewNeighbour(opt *Option) *neighbourCollection {
-	if opt == nil {
-		opt = DefaultOption()
-	}
-	return &neighbourCollection{
-		//master:              ef(),
-		observedSet: newneighbourSet(opt),
-		beenObservedSet: newneighbourSet(&Option{
-			NeighbourCount: opt.NeighbourCount * NEIGHBOUR_BEEN_OBSERVE_RATE,
-			Radius:         opt.Radius,
-		}),
+func NewNeighbour(optfns ...NeighbourConfigFunc) *neighbourCollection {
+
+	opt := DefaultOption()
+
+	nei := &neighbourCollection{
 		opt: opt,
 	}
+
+	nei.observedSet = newneighbourSet(opt)
+	nei.beenObservedSet = newneighbourSet(&Option{
+		NeighbourCount: opt.NeighbourCount * NEIGHBOUR_BEEN_OBSERVE_RATE,
+		Radius:         opt.Radius,
+	})
+	for _, fn := range optfns {
+		fn(nei)
+	}
+	return nei
 }
 
 // 基本的视野容器集合
@@ -275,8 +280,8 @@ func (nb *neighbourCollection) beenJoin(v any) int {
 	case AgentEntity:
 		nb.beenObservedSet.add(val)
 	}
-	log.Debug("-------beenJoin ID:%v %v %v %v", nb.master.ID(),
-		len(nb.beenObservedSet.list_increase), len(nb.beenObservedSet.list_move), len(nb.beenObservedSet.list_leave))
+	//log.Debug("-------beenJoin ID:%v %v %v %v", nb.master.ID(),
+	//	len(nb.beenObservedSet.list_increase), len(nb.beenObservedSet.list_move), len(nb.beenObservedSet.list_leave))
 	return MESSAGE_EVENT_EMPTY
 }
 

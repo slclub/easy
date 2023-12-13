@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -23,6 +24,6 @@ func RunBusiniess() {
 
 func wait() {
 	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, os.Kill)
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT)
 	<-c
 }

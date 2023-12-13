@@ -4,6 +4,7 @@ import (
 	"github.com/slclub/easy/vendors/option"
 )
 
+// ------------------------------------------------------------------------------------------------------
 // 取出某个坐标轴的值，且转换成 链表的键值
 func handleIndexForList(index int) HandleIndexFunc {
 	return func(entity Entity) (uint64, uint64) {
@@ -16,6 +17,8 @@ func handleIndexForList(index int) HandleIndexFunc {
 	}
 }
 
+// ------------------------------------------------------------------------------------------------------
+// 初始化aoi的 OptionFunc
 func handleNewListWithAxis(axisArr []int) option.OptionFunc {
 	return func() (string, any) {
 		lists := []*containerList{}
@@ -23,5 +26,19 @@ func handleNewListWithAxis(axisArr []int) option.OptionFunc {
 			lists = append(lists, newContainerList(handleIndexForList(axis)))
 		}
 		return "Lists", lists
+	}
+}
+
+// ------------------------------------------------------------------------------------------------------
+// neighbour configure functions
+func NeighbourWithMaster(entity Entity) NeighbourConfigFunc {
+	return func(nei *neighbourCollection) {
+		nei.master = entity
+	}
+}
+
+func NeighbourWithOption(option *Option) NeighbourConfigFunc {
+	return func(nei *neighbourCollection) {
+		nei.opt = option
 	}
 }

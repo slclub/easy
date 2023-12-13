@@ -11,7 +11,6 @@ package aoi
 
 import (
 	"github.com/slclub/easy/nets/agent"
-	"github.com/slclub/easy/vendors/option"
 )
 
 // The game player object should implements the Entity interface.
@@ -56,7 +55,6 @@ type Npc interface {
 
 type Neighbour interface {
 	neighbourInternel
-	BindWith(assignment option.Assignment)
 	RangeIncrease(fn func(entity Entity) bool)
 	RangeMove(fn func(entity Entity) bool)
 	RangeLeave(fn func(entity Entity) bool)

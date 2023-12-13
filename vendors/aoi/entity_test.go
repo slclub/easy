@@ -23,9 +23,6 @@ type user struct {
 func newUserWithAoi(aoi AOI) *user {
 	u1 := newUser(option.OptionWith(nil).Default(
 		option.OptionFunc(func() (string, any) {
-			return "Neighbour", NewNeighbour(aoi.Option())
-		}),
-		option.OptionFunc(func() (string, any) {
 			return "Position", []float32{0, 0, 0}
 		}),
 		option.OptionFunc(func() (string, any) {
@@ -38,11 +35,10 @@ func newUserWithAoi(aoi AOI) *user {
 
 	message := &messageUser{master: u1}
 	u1.message = message
-	u1.neighbour.BindWith(option.OptionWith(nil).Default(
-		option.OptionFunc(func() (string, any) {
-			return "Master", u1
-		}),
-	))
+	u1.neighbour = NewNeighbour(
+		NeighbourWithOption(aoi.Option()),
+		NeighbourWithMaster(u1),
+	)
 
 	return u1
 }
