@@ -90,7 +90,7 @@ HandleConvert(fn func(args ...any)) EventHandle
 
 Their relationship is many to many.
 
-## Custom
+## Customize
 
 - Implement AsyncSubmiter
 

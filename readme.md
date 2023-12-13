@@ -307,6 +307,8 @@ servers.NewTCPServer()
 
 [events package](https://github.com/slclub/easy/blob/master/docs/events.md)
 
+[log8q package](https://github.com/slclub/log8q)
+
 
 ---- 
 
