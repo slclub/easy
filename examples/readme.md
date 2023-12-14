@@ -42,6 +42,16 @@
 
 明显是simple 对应的客户端测试代码
 
+- run
+
+nws  = the number of websocket connections
+
+ntcp = the number of tcp connections
+
+```go
+go build && ./simple_client -nws=1000 -ntcp=0
+```
+
 ---
 
 ## RPC
