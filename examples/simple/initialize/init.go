@@ -7,9 +7,15 @@ import (
 	"simple/message"
 )
 
-func Init() {
+var ListenPort = 15080
+
+func Init(fn func()) {
 	// 读取配置
 	// do configurition
+
+	if fn != nil {
+		fn()
+	}
 
 	// listen servers initialization
 	forServerInitialize()
@@ -19,7 +25,7 @@ func Init() {
 
 func forServerInitialize() {
 	// Init configure data to listening server.
-	lservers.InitListenServer()
+	lservers.InitListenServer(ListenPort)
 
 	// registing messages to the Router of listening server
 	message.Init()

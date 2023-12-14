@@ -57,7 +57,7 @@ func StartTCP() {
 	// 初始化 客户端
 	TCPMgr = NewTCPTestMgr(&client.Gate{
 		Protocol:     typehandle.ENCRIPT_DATA_JSON,
-		Addr:         ":18081",
+		Addr:         ":15081",
 		LittleEndian: true,
 	})
 

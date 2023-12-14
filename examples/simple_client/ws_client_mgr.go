@@ -29,7 +29,7 @@ func (self *WsTestMgr) Init() {
 	for i := 0; i < nws; i++ {
 		self.append(self.CreateRole())
 	}
-	self.append(self.CreateRole())
+	//self.append(self.CreateRole())
 }
 
 func (self *WsTestMgr) CreateRole() *Role {
@@ -58,7 +58,7 @@ func StartWs() {
 	// 初始化 客户端
 	WsMgr = NewWsTestMgr(&client.Gate{
 		Protocol:     typehandle.ENCRIPT_DATA_JSON,
-		Addr:         ":18080",
+		Addr:         ":15080",
 		LittleEndian: true,
 	})
 

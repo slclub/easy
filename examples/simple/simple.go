@@ -11,7 +11,9 @@ import (
 func main() {
 	log.LEVEL = log8q.ALL_LEVEL // 开放框架的全日志
 
-	initialize.Init()
+	initialize.Init(func() {
+		initialize.ListenPort = 15080
+	})
 	Start()
 }
 

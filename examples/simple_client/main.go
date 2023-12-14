@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/slclub/easy/log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,7 +15,7 @@ var (
 
 func init() {
 	flag.IntVar(&nws, "nws", 1, " ws client numbers")
-	flag.IntVar(&nws, "ntcp", 1, " tcp client numbers")
+	flag.IntVar(&ntcp, "ntcp", 0, " tcp client numbers")
 }
 
 func main() {
@@ -32,6 +33,7 @@ func main() {
 func RunBusiniess() {
 	Do(WsMgr.roles)
 	Do(TCPMgr.roles)
+	log.Debug("ntpc=%v nws:=%v  WebSocket.Roles=%v TCP.Roles=%v", ntcp, nws, len(WsMgr.roles), len(TCPMgr.roles))
 }
 
 func wait() {

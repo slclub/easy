@@ -5,6 +5,7 @@ import (
 	"github.com/slclub/easy/servers"
 	"github.com/slclub/easy/typehandle"
 	"github.com/slclub/easy/vendors/option"
+	"strconv"
 )
 
 var (
@@ -36,11 +37,11 @@ func Server2() servers.ListenServer {
 	return server2
 }
 
-func InitListenServer() {
+func InitListenServer(ListenPort int) {
 	server1 = servers.NewWSServer()
 
 	server1.Init(option.OptionWith(&agent.Gate{
-		Addr:            ":18080",
+		Addr:            ":" + strconv.Itoa(ListenPort),
 		Protocol:        typehandle.ENCRIPT_DATA_JSON,
 		PendingWriteNum: 2000,
 		LittleEndian:    true,
@@ -49,7 +50,7 @@ func InitListenServer() {
 
 	server2 = servers.NewTCPServer()
 	server2.Init(option.OptionWith(&agent.Gate{
-		Addr:            ":18081",
+		Addr:            ":" + strconv.Itoa(ListenPort+1),
 		Protocol:        typehandle.ENCRIPT_DATA_JSON,
 		PendingWriteNum: 2000,
 		LittleEndian:    true,

@@ -39,5 +39,5 @@ func sendMsgRoles(roles []*Role, msg any) {
 		}
 		role.Agent().WriteMsg(msg)
 	}
-	fmt.Println("------ DO roles ", len(roles), " client: ", reflect.TypeOf(roles[0].client).Elem().Name())
+	fmt.Println("------ DO roles ", len(roles), " client: ", reflect.TypeOf(roles[len(roles)-1].client).Elem().Name())
 }
