@@ -26,9 +26,9 @@ func NewTCPTestMgr(gate *client.Gate) *TCPTestMgr {
 
 func (self *TCPTestMgr) Init() {
 	// create three roles
-	self.append(self.CreateRole())
-	self.append(self.CreateRole())
-	self.append(self.CreateRole())
+	for i := 0; i < ntcp; i++ {
+		self.append(self.CreateRole())
+	}
 }
 
 func (self *TCPTestMgr) CreateRole() *Role {

@@ -26,7 +26,9 @@ func NewWsTestMgr(gate *client.Gate) *WsTestMgr {
 
 func (self *WsTestMgr) Init() {
 	// create  two roles
-	self.append(self.CreateRole())
+	for i := 0; i < nws; i++ {
+		self.append(self.CreateRole())
+	}
 	self.append(self.CreateRole())
 }
 

@@ -15,3 +15,8 @@ func (self *connChan) closeChan() {
 	close(self.stopChan)
 	close(self.writeChan)
 }
+
+func (self *connChan) release() {
+	self.stopChan = nil
+	self.writeChan = nil
+}

@@ -34,7 +34,8 @@ func sendMsgRoles(roles []*Role, msg any) {
 	}
 	for _, role := range roles {
 		if role.Agent() == nil {
-			panic(any("agent of role is nil"))
+			continue
+			//panic(any("agent of role is nil"))
 		}
 		role.Agent().WriteMsg(msg)
 	}

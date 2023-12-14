@@ -77,7 +77,7 @@ func (self *WebSocketHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ag.LoopRecv(self.handle)
 
 	ag.Close()
-	ag.OnClose()
+	//ag.OnClose()
 	self.server.hook.EmitWithKey(CONST_AGENT_CLOSE, ag)
 	self.server.box.Del(conn)
 }
@@ -86,12 +86,12 @@ func (self *WebSocketHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func dealHandle(serv *Server) agent.AgentHandle {
 	return func(data []byte, ag agent.Agent) {
 
-		msg, err := serv.router.Encoder().Unmarshal(data)
+		msg, err := serv.Router().Encoder().Unmarshal(data)
 		if err != nil {
 			log.Debug("unmarshal message error: %v", err)
 			return
 		}
-		err = serv.router.Route(msg, ag)
+		err = serv.Router().Route(msg, ag)
 		if err != nil {
 			log.Debug("route message error: %v", err)
 			return

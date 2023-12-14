@@ -44,7 +44,7 @@ func InitListenServer() {
 		Protocol:        typehandle.ENCRIPT_DATA_JSON,
 		PendingWriteNum: 2000,
 		LittleEndian:    true,
-		MaxConnNum:      2000,
+		MaxConnNum:      20000,
 	}).Default(option.DEFAULT_IGNORE_ZERO))
 
 	server2 = servers.NewTCPServer()
@@ -53,6 +53,6 @@ func InitListenServer() {
 		Protocol:        typehandle.ENCRIPT_DATA_JSON,
 		PendingWriteNum: 2000,
 		LittleEndian:    true,
-		MaxConnNum:      2000,
+		MaxConnNum:      20000,
 	}).Default(option.DEFAULT_IGNORE_ZERO))
 }

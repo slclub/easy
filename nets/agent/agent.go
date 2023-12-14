@@ -14,14 +14,10 @@ type agent struct {
 
 type AgentHandle func([]byte, Agent)
 
-func NewAgent(conn conns.Conn) *agent {
+func NewAgent(conn conns.Conn) Agent {
 	return &agent{
 		conn: conn,
 	}
-}
-
-func (a *agent) Run() {
-
 }
 
 func (a *agent) LoopRecv(handle AgentHandle) {
@@ -30,27 +26,18 @@ func (a *agent) LoopRecv(handle AgentHandle) {
 		select {
 		case <-a.conn.Done():
 			//a.conn.WriteMsg()
+			log.Debug("agent.LoopRecv STOP")
 			return
 		default:
 			data, err := a.conn.ReadMsg()
 			if err != nil {
-				log.Debug("agent read connection [%v] error message: %v", a.conn, err)
+				log.Debug("agent read connection error message: %v", err)
 				return
 			}
+			if handle == nil {
+				continue
+			}
 			handle(data, a)
-			//if a.gate.Processor == nil {
-			//	continue
-			//}
-			//msg, err := a.gate.Processor.Unmarshal(data)
-			//if err != nil {
-			//	log.Debug("unmarshal message error: %v", err)
-			//	return
-			//}
-			//err = a.gate.Processor.Route(msg, a)
-			//if err != nil {
-			//	log.Debug("route message error: %v", err)
-			//	return
-			//}
 		}
 	}
 }
@@ -87,6 +74,7 @@ func (a *agent) RemoteAddr() net.Addr {
 func (a *agent) Close() {
 	//a.Destroy()
 	a.conn.Close()
+	a.userData = nil
 }
 
 func (a *agent) Destroy() {

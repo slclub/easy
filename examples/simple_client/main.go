@@ -1,12 +1,24 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
+var (
+	nws  int
+	ntcp int
+)
+
+func init() {
+	flag.IntVar(&nws, "nws", 1, " ws client numbers")
+	flag.IntVar(&nws, "ntcp", 1, " tcp client numbers")
+}
+
 func main() {
+	flag.Parse()
 
 	StartWs()
 	StartTCP()

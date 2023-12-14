@@ -64,7 +64,7 @@ func (self *TCPServer) run() {
 			ag.LoopRecv(dealHandle(&self.Server))
 
 			ag.Close()
-			ag.OnClose()
+			//ag.OnClose()
 			self.hook.EmitWithKey(CONST_AGENT_CLOSE, ag)
 			self.box.Del(conn)
 

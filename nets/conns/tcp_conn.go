@@ -23,12 +23,12 @@ func NewTCPConn(conn net.Conn, pendingWriteNum int, option *Option) *TCPConn {
 		option.MsgParser = NewMsgParser()
 	}
 	tcpConn.Option.MsgParser.SetWithOption(option)
-	go tcpConn.LoopSend()
+	go tcpConn.loopSend()
 
 	return tcpConn
 }
 
-func (self *TCPConn) LoopSend() {
+func (self *TCPConn) loopSend() {
 	defer self.Destroy()
 	for {
 		select {

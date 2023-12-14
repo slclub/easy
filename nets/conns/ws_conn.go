@@ -22,18 +22,19 @@ func NewWSConn(conn *websocket.Conn, option *Option, pendingWriteNum int, maxMsg
 	wsConn.stopChan = make(chan struct{})
 	wsConn.Option = option
 
-	go wsConn.LoopSend()
+	go wsConn.loopSend()
 	//go wsConn.loopRecv(handle)
 
 	return wsConn
 }
 
-func (self *WSConn) LoopSend() {
+func (self *WSConn) loopSend() {
 	defer self.Destroy()
 	for {
 		select {
 		case <-self.Done():
 			self.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			log.Debug("WSConn.loopSend STOP")
 			return
 		case b := <-self.writeChan:
 			if b == nil {
@@ -58,7 +59,7 @@ func (self *WSConn) LoopRecv(handle Handle) {
 		default:
 			data, err := self.ReadMsg()
 			if err != nil {
-				log.Debug("agent read connection [%v] error message: %v", self, err)
+				log.Debug("ws conn read connection [%v] error message: %v", self, err)
 				return
 			}
 			handle(data)
@@ -71,9 +72,10 @@ func (wsConn *WSConn) doDestroy() {
 	wsConn.conn.Close()
 
 	if !wsConn.closeFlag {
-		close(wsConn.writeChan)
+		//close(wsConn.writeChan)
 		wsConn.closeFlag = true
 	}
+	wsConn.release()
 }
 
 func (wsConn *WSConn) Destroy() {
@@ -148,6 +150,12 @@ func (wsConn *WSConn) WriteMsg(args []byte) error {
 	// don't copy
 	wsConn.doWrite(args)
 	return nil
+}
+
+func (WSConn *WSConn) release() {
+	WSConn.connChan.release()
+	WSConn.Option = nil
+	WSConn.conn = nil
 }
 
 var _ Conn = &WSConn{}

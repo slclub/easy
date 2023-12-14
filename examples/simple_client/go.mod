@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/slclub/easy v0.0.0
+	github.com/slclub/easy/client v0.0.0
 	github.com/slclub/log8q v0.0.0-20230616080111-f3ddb72f6705
 )
 
@@ -24,12 +25,15 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.13.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
-	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/slclub/easy => ../../ //
+replace (
+	github.com/slclub/easy => ../../
+	github.com/slclub/easy/client => ../../client
+)
