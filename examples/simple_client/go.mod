@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/slclub/easy v0.0.0
 	github.com/slclub/easy/client v0.0.0
-	github.com/slclub/log8q v0.0.0-20230616080111-f3ddb72f6705
+	github.com/slclub/log8q v0.0.0-20231214111312-99e48ace595a
 )
 
 require (

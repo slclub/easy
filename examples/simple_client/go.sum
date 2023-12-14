@@ -158,6 +158,8 @@ github.com/slclub/go-tips v0.0.0-20230602023419-743e00a79b9f h1:9MPUscTRkCxqQ1tj
 github.com/slclub/go-tips v0.0.0-20230602023419-743e00a79b9f/go.mod h1:GyEr81GN4ekskzgCozs7MvpzqfZiUDflYpL3e8zgHXA=
 github.com/slclub/log8q v0.0.0-20230616080111-f3ddb72f6705 h1:qhC6iKjnEyLYt3h+kNQysI5aKqdAsWpizeWn7lA5OBg=
 github.com/slclub/log8q v0.0.0-20230616080111-f3ddb72f6705/go.mod h1:hLaSxG95aUbpy6U5+4srSX7wyxYUMjt9C3QJzfgUbvU=
+github.com/slclub/log8q v0.0.0-20231214111312-99e48ace595a h1:H/XTg4Ew5yYmKiYLVGHTjcHzar6bak7cBew7vAV7+b8=
+github.com/slclub/log8q v0.0.0-20231214111312-99e48ace595a/go.mod h1:hLaSxG95aUbpy6U5+4srSX7wyxYUMjt9C3QJzfgUbvU=
 github.com/spf13/afero v1.8.2 h1:xehSyVa0YnHWsJ49JFljMpg1HX19V6NDZ1fkm1Xznbo=
 github.com/spf13/afero v1.8.2/go.mod h1:CtAatgMJh6bJEIs48Ay/FOnkljP3WeGUG0MC1RfAqwo=
 github.com/spf13/cast v1.5.0 h1:rj3WzYc11XZaIZMPKmwP96zkFEnnAmV8s6XbB2aY32w=
