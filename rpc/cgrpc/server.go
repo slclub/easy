@@ -9,6 +9,7 @@ import (
 	"github.com/slclub/easy/log"
 	"github.com/slclub/easy/rpc/etcd"
 	"github.com/slclub/easy/vendors/option"
+	"github.com/slclub/go-tips"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"net"
@@ -21,6 +22,7 @@ type Server struct {
 	ID           string
 	pathName     string
 	Addr         string
+	listenAddr   string
 	AddrToClient string
 	TTL          int64
 	Namespace    string
@@ -39,12 +41,15 @@ func NewServer(assignment option.Assignment) *Server {
 		return "TTL", 15
 	}))
 	assignment.Apply()
+	if ser.listenAddr == "" {
+		ser.listenAddr = ":" + tips.StrEnd(ser.Addr, ":")
+	}
 	return ser
 }
 
 // suitable grpc option configration
 func (self *Server) Serv(opts ...grpc.ServerOption) {
-	listener, err := net.Listen("tcp", self.Addr)
+	listener, err := net.Listen("tcp", self.listenAddr)
 	if err != nil {
 		fmt.Println("GRPC Server start error:", err)
 		return
