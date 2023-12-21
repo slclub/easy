@@ -154,7 +154,7 @@ func (wsConn *WSConn) WriteMsg(args []byte) error {
 
 func (WSConn *WSConn) release() {
 	WSConn.connChan.release()
-	WSConn.Option = nil
+	//WSConn.Option = nil
 	WSConn.conn = nil
 }
 

@@ -125,7 +125,9 @@ func (self *AoiArea) Option() *Option {
 }
 
 func (self *AoiArea) enter(entity Entity) {
+	self.cross.Delete(entity)
 	self.cross.Add(entity)
+
 	arr := []Entity{}
 	// 查询半径范围内Entity
 	switch me := entity.(type) {
