@@ -74,7 +74,7 @@ func (a *agent) RemoteAddr() net.Addr {
 func (a *agent) Close() {
 	//a.Destroy()
 	a.conn.Close()
-	a.userData = nil
+	//a.userData = nil
 }
 
 func (a *agent) Destroy() {
