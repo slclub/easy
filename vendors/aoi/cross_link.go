@@ -56,6 +56,9 @@ func (self *crossList) caculateWeightOne(obj *containerList, count, min int) {
 }
 
 func (self *crossList) caculateWeight(min int) {
+	if min <= 0 {
+		min = 1
+	}
 	for i, cl := range self.lists {
 		self.caculateWeightOne(cl, self.countArr[i], min)
 	}
@@ -184,6 +187,15 @@ func (self *crossList) DeleteCache(entity Entity) {
 }
 
 func (self *crossList) RangeByRadius(entity Entity, fn func(other Entity)) {
+	self.RangeByRadiusAll(entity, func(other Entity, check bool) {
+		if !check {
+			return
+		}
+		fn(other)
+	})
+}
+
+func (self *crossList) RangeByRadiusAll(entity Entity, fn func(other Entity, check bool)) {
 	minCount := 10000
 	step := self.step()
 	entitys := []Entity{}
@@ -200,11 +212,11 @@ func (self *crossList) RangeByRadius(entity Entity, fn func(other Entity)) {
 	}
 
 	for _, one := range entitys {
-		// 计算  另外的坐标系
-		if !self.nearCheck(entity, one) {
-			continue
-		}
-		fn(one)
+		//// 计算  另外的坐标系
+		//if !self.nearCheck(entity, one) {
+		//	continue
+		//}
+		fn(one, self.nearCheck(entity, one))
 	}
 
 	if step == 0 {

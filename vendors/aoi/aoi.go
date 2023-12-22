@@ -228,71 +228,61 @@ func (self *AoiArea) move(entity Entity) {
 		defer me.Neighbour().reset(NEIGHBOUR_CLEAN)
 		increases := []Entity{}
 		moves := []Entity{}
-		self.cross.RangeByRadius(me, func(other Entity) {
+		decrease := []Entity{}
+		self.cross.RangeByRadiusAll(me, func(other Entity, nearcheck bool) {
 			switch him := other.(type) {
 			case AgentEntity:
-				me.Neighbour().join(him)
-				ecode := him.Neighbour().join(me)
+				ecode := MESSAGE_EVENT_EMPTY
+				if nearcheck {
+					me.Neighbour().join(him)
+					ecode = him.Neighbour().join(me)
+				} else {
+					//if self.cross.nearOldCheck(me, him) { // 优化
+					me.Neighbour().leave(him)
+					ecode = him.Neighbour().leave(me)
+					//}
+				}
 				self.handleMessageEvent(ecode, him, me)
 			case Monster:
-				if self.cross.nearOldCheck(me, him) {
-					moves = append(moves, him)
-					him.AoiMessage().Move([]Entity{me})
+				if nearcheck {
+					if self.cross.nearOldCheck(me, him) {
+						moves = append(moves, him)
+						him.AoiMessage().Move([]Entity{me})
+					} else {
+						increases = append(increases, him)
+						him.AoiMessage().Appear([]Entity{me})
+					}
 				} else {
-					increases = append(increases, him)
-					him.AoiMessage().Appear([]Entity{me})
+					if self.cross.nearOldCheck(me, him) {
+						him.AoiMessage().Disappear([]Entity{me})
+						decrease = append(decrease, him)
+					}
 				}
 
 			case Npc:
-				if self.cross.nearOldCheck(me, him) {
-					moves = append(moves, him)
-					him.AoiMessage().Move([]Entity{me})
+				if nearcheck {
+					if self.cross.nearOldCheck(me, him) {
+						moves = append(moves, him)
+						him.AoiMessage().Move([]Entity{me})
+					} else {
+						increases = append(increases, him)
+						him.AoiMessage().Appear([]Entity{me})
+					}
 				} else {
-					increases = append(increases, him)
-					him.AoiMessage().Appear([]Entity{him})
+					if self.cross.nearOldCheck(me, him) {
+						him.AoiMessage().Disappear([]Entity{me})
+						decrease = append(decrease, him)
+					}
 				}
 			}
 		})
 		// 出视野
 		me.AoiMessage().Disappear(me.Neighbour().leaveEntitys())
+		me.AoiMessage().Disappear(decrease)
 
 		// 入视野
 		me.AoiMessage().Appear(me.Neighbour().increaseEntitys())
 		me.AoiMessage().Appear(increases)
-
-		// 差集逻辑
-		// 当前 角色从 别人的视角中消失
-		// 可以用被观察 数据直接循环，替换此逻辑
-		//self.cross.RangeByRadiusDiff(entity, func(other Entity) {
-		//	switch him := other.(type) {
-		//	case AgentEntity:
-		//		ecode := him.Neighbour().leave(me)
-		//		self.handleMessageEvent(ecode, him, me)
-		//	case Npc:
-		//		him.AoiMessage().Disappear([]Entity{me})
-		//	case Monster:
-		//		him.AoiMessage().Disappear([]Entity{me})
-		//	}
-		//})
-
-		// 可以，替换上面查找 链表的结构
-		// 优点，不怕距离离的远，不会受到半径的局限，性能也会好很多
-		me.Neighbour().RangeBeenObservedSet(func(other Entity) bool {
-			//log.Debug("-------- Neighbour().RangeBeenObservedSet %v", other.ID())
-			if self.cross.nearCheck(entity, other) {
-				return true
-			}
-			switch him := other.(type) {
-			case AgentEntity:
-				ecode := him.Neighbour().leave(me)
-				self.handleMessageEvent(ecode, him, me)
-			case Npc:
-				him.AoiMessage().Disappear([]Entity{me})
-			case Monster:
-				him.AoiMessage().Disappear([]Entity{me})
-			}
-			return true
-		})
 	}
 
 }
@@ -304,6 +294,7 @@ func (self *AoiArea) handleMessageEvent(ecode int, target, from AgentEntity) {
 		target.Neighbour().reset(NEIGHBOUR_CLEAN)
 	case MESSAGE_EVENT_DISAPPEAR:
 		target.AoiMessage().Disappear([]Entity{from})
+		target.Neighbour().reset(NEIGHBOUR_CLEAN)
 	case MESSAGE_EVENT_MOVE:
 		target.AoiMessage().Move([]Entity{from})
 	}

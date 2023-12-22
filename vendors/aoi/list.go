@@ -67,8 +67,11 @@ func (this *containerList) delete(entity Entity, both bool) {
 }
 
 func (this *containerList) getSentinelIndex(entity Entity, radius float32) (uint64, uint64) {
-	index, _ := this.handle(entity)
-	return index - uint64(radius*CHANGE_FLOAT_TO_INT), index + uint64(radius*CHANGE_FLOAT_TO_INT)
+	index, index_old := this.handle(entity)
+	if index > index_old {
+		return index_old - uint64(radius*CHANGE_FLOAT_TO_INT), index + uint64(radius*CHANGE_FLOAT_TO_INT)
+	}
+	return index - uint64(radius*CHANGE_FLOAT_TO_INT), index_old + uint64(radius*CHANGE_FLOAT_TO_INT)
 }
 
 func (this *containerList) getLatestNodes(index uint64) []*skiplist.Node {
