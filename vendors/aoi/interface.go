@@ -74,6 +74,7 @@ type neighbourInternel interface {
 	increaseEntitys() []Entity
 	moveEntitys() []Entity
 	leaveEntitys() []Entity
+	cutIncrease()
 }
 
 // It is the mainly interface of AOI

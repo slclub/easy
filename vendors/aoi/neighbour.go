@@ -78,7 +78,7 @@ func (nc *neighbourSet) add(entity Entity) int {
 		if entity.ID() != nc.list_leave[i].ID() {
 			continue
 		}
-		if nc.len() >= limit {
+		if len(nc.list_move) >= limit {
 			return MESSAGE_EVENT_EMPTY
 		}
 		nc.list_move = append(nc.list_move, entity)
@@ -160,7 +160,7 @@ func (nc *neighbourSet) clear() {
 func (nc *neighbourSet) len() int {
 	//nc.nlock.Lock()
 	//defer nc.nlock.Unlock()
-	return len(nc.list_move) //+ len(nc.list_increase)
+	return len(nc.list_move) + len(nc.list_increase)
 }
 
 func (nc *neighbourSet) getMove() []Entity {
@@ -210,6 +210,18 @@ func (nc *neighbourSet) lenIncrease() int {
 		return 0
 	}
 	return cha
+}
+
+func (nc *neighbourSet) cutIncrease() {
+	if len(nc.list_move) >= nc.Option.NeighbourCount {
+		nc.list_increase = []Entity{}
+		return
+	}
+	n := nc.Option.NeighbourCount - len(nc.list_move)
+	if n > len(nc.list_increase) {
+		n = len(nc.list_increase)
+	}
+	nc.list_increase = nc.list_increase[:n]
 }
 
 // ---------neighbourSet-----------------------
@@ -316,6 +328,10 @@ func (nb *neighbourCollection) reset(v any) {
 func (nb *neighbourCollection) clear() {
 	nb.observedSet.clear()
 	nb.beenObservedSet.clear()
+}
+
+func (nb *neighbourCollection) cutIncrease() {
+	nb.observedSet.cutIncrease()
 }
 
 var _ Neighbour = &neighbourCollection{}

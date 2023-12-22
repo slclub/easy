@@ -281,6 +281,7 @@ func (self *AoiArea) move(entity Entity) {
 		me.AoiMessage().Disappear(decrease)
 
 		// 入视野
+		me.Neighbour().cutIncrease()
 		me.AoiMessage().Appear(me.Neighbour().increaseEntitys())
 		me.AoiMessage().Appear(increases)
 	}
