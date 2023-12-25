@@ -68,8 +68,11 @@ func (self *WSConn) LoopRecv(handle Handle) {
 }
 
 func (wsConn *WSConn) doDestroy() {
-	wsConn.conn.UnderlyingConn().(*net.TCPConn).SetLinger(0)
-	wsConn.conn.Close()
+	ccn := wsConn.conn
+	if ccn != nil {
+		ccn.UnderlyingConn().(*net.TCPConn).SetLinger(0)
+		ccn.Close()
+	}
 
 	if !wsConn.closeFlag {
 		//close(wsConn.writeChan)
