@@ -12,3 +12,7 @@ type Agent interface {
 	SetUserData(data any)
 	LoopRecv(handle AgentHandle)
 }
+
+type AgentTicker interface {
+	Tick()
+}

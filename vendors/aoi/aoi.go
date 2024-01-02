@@ -63,6 +63,7 @@ func (self *AoiArea) init() {
 }
 
 func (self *AoiArea) tickUpdate() {
+	defer self.clear()
 	defer close(self.chanMove)
 	for {
 		select {
@@ -90,7 +91,7 @@ func (self *AoiArea) tickUpdate() {
 			case OPER_QUIT:
 				op = nil
 				log.Info("[AOI][TickUpdate][QUIT]")
-				self.Clear()
+				//self.Clear()
 				return
 			}
 			op = nil
@@ -122,6 +123,9 @@ func (self *AoiArea) Clear() {
 
 func (self *AoiArea) Option() *Option {
 	return self.option
+}
+
+func (self *AoiArea) clear() {
 }
 
 func (self *AoiArea) enter(entity Entity) {
