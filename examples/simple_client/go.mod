@@ -3,7 +3,7 @@ module simple_client
 go 1.19
 
 require (
-	github.com/slclub/easy v0.0.0
+	github.com/slclub/easy v0.0.2
 	github.com/slclub/easy/client v0.0.0
 	github.com/slclub/log8q v0.0.0-20231214111312-99e48ace595a
 )

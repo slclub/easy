@@ -17,11 +17,11 @@ func RegisterCallerToLservers() {
 }
 
 func handleOnConnNew(ag agent.Agent) {
-	log8q.Log().Info("[CONNECTION.NEW] server create an new connection")
+	log8q.Info("[CONNECTION.NEW] server create an new connection")
 }
 
 func handleOnConnClose(ag agent.Agent) {
-	log8q.Log().Info("[CONNECTION.CLOSE] server closed an old connection")
+	log8q.Info("[CONNECTION.CLOSE] server closed an old connection")
 }
 
 // the current listening server is closing
