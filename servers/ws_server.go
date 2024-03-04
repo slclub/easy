@@ -76,7 +76,7 @@ func (self *WebSocketHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	self.server.hook.EmitWithKey(CONST_AGENT_NEW, ag)
 	ag.LoopRecv(self.handle)
 
-	ag.Close()
+	//ag.Close()
 	//ag.OnClose()
 	self.server.hook.EmitWithKey(CONST_AGENT_CLOSE, ag)
 	self.server.box.Del(conn)

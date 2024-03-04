@@ -15,6 +15,12 @@ const (
 
 	NEIGHBOUR_BEEN_OBSERVE_RATE = 5 // 被观察集合的人数倍率 按理是无需要限制的，5倍也接近不限制了
 
+	NEIGHBOUR_WEIGHT_0 = 0 // 陌生人
+	NEIGHBOUR_WEIGHT_1 = 1
+	NEIGHBOUR_WEIGHT_2 = 2 // 亲近关系，直接加入到附近兴趣视野
+	NEIGHBOUR_WEIGHT_3 = 3 // 同上
+	NEIGHBOUR_WEIGHT_4 = 4 // 同上
+
 	NEIGHBOUR_CLEAN = "clean"
 )
 
@@ -41,6 +47,8 @@ func NewNeighbour(optfns ...NeighbourConfigFunc) *neighbourCollection {
 		NeighbourCount: opt.NeighbourCount * NEIGHBOUR_BEEN_OBSERVE_RATE,
 		Radius:         opt.Radius,
 	})
+	nei.observedSet.master = nei.master
+	nei.beenObservedSet.master = nei.master
 	for _, fn := range optfns {
 		fn(nei)
 	}
@@ -50,6 +58,7 @@ func NewNeighbour(optfns ...NeighbourConfigFunc) *neighbourCollection {
 // 基本的视野容器集合
 type neighbourSet struct {
 	Option        *Option
+	master        Entity
 	list_increase []Entity
 	list_move     []Entity
 	list_leave    []Entity
@@ -68,8 +77,26 @@ func newneighbourSet(opt *Option) *neighbourSet {
 	}
 }
 
-// 进入/移动 (视野集合 添加操作
 func (nc *neighbourSet) add(entity Entity) int {
+	if nc.Option.NeighbourWeight == nil {
+		return nc.addLimit(entity)
+	}
+	switch weight := nc.Option.NeighbourWeight.Value(entity, nc.master); weight {
+	case NEIGHBOUR_WEIGHT_0, NEIGHBOUR_WEIGHT_1:
+		return nc.addLimit(entity)
+	case NEIGHBOUR_WEIGHT_2:
+		return nc.addDirect(entity)
+	case NEIGHBOUR_WEIGHT_3:
+		return nc.addDirect(entity)
+	case NEIGHBOUR_WEIGHT_4:
+		return nc.addDirect(entity)
+	default:
+		return nc.addLimit(entity)
+	}
+}
+
+// 进入/移动 (视野集合 添加操作
+func (nc *neighbourSet) addLimit(entity Entity) int {
 	limit := nc.Option.NeighbourCount
 	nc.nlock.Lock()
 	defer nc.nlock.Unlock()
@@ -97,6 +124,30 @@ func (nc *neighbourSet) add(entity Entity) int {
 		return MESSAGE_EVENT_EMPTY
 	}
 	// 填入到新增
+	nc.list_increase = append(nc.list_increase, entity)
+	return MESSAGE_EVENT_APPEAR
+}
+
+func (nc *neighbourSet) addDirect(entity Entity) int {
+	nc.nlock.Lock()
+	defer nc.nlock.Unlock()
+	for i, n := 0, len(nc.list_leave); i < n; i++ {
+		if entity.ID() != nc.list_leave[i].ID() {
+			continue
+		}
+
+		nc.list_move = append(nc.list_move, entity)
+		// 快速清除 已经存在的元素
+		nc.list_leave[i] = nc.list_leave[n-1]
+		nc.list_leave = nc.list_leave[:n-1]
+		return MESSAGE_EVENT_MOVE
+	}
+	// 遍历移动
+	for _, target := range nc.list_move {
+		if entity.ID() == target.ID() {
+			return MESSAGE_EVENT_MOVE
+		}
+	}
 	nc.list_increase = append(nc.list_increase, entity)
 	return MESSAGE_EVENT_APPEAR
 }

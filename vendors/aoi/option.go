@@ -6,9 +6,10 @@ const (
 )
 
 type Option struct {
-	Radius         float32
-	NeighbourCount int
-	Axis           []int // 坐标系选择 0, 1, 2 := x,y,z
+	Radius          float32
+	NeighbourCount  int
+	Axis            []int // 坐标系选择 0, 1, 2 := x,y,z
+	NeighbourWeight NeighbourWeight
 }
 
 func DefaultOption() *Option {

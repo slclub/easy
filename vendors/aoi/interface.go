@@ -120,3 +120,7 @@ type AoiMessage interface {
 	Move([]Entity)
 	Disappear([]Entity)
 }
+
+type NeighbourWeight interface {
+	Value(entiry, master Entity) int
+}
