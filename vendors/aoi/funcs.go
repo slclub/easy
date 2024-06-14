@@ -13,5 +13,6 @@ func compareRadius(f1, f2 float32, radius float32) bool {
 	if f < 0 {
 		f = f * -1
 	}
+	//fmt.Println("============", f < radius, "------", f, radius, f1, f2)
 	return f < radius
 }

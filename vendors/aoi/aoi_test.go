@@ -46,7 +46,7 @@ func TestMove1(t *testing.T) {
 	time.Sleep(time.Millisecond * 5)
 	positions := [][]float32{
 		[]float32{18, 0, 20},
-		[]float32{19, 0, 100},
+		[]float32{19, 0, 17},
 		[]float32{19.5, 0, 20.2},
 	}
 
@@ -56,17 +56,19 @@ func TestMove1(t *testing.T) {
 	users[3].PositionPre(positions[2]...)
 
 	// 具体移动交给 entity.Move 设置到 Position才算真正的移动
-	aoiObject.Move(users[0])
-	time.Sleep(time.Millisecond * 5)
+	//aoiObject.Move(users[0])
+
 	log.Debug(" --------- user2.Move Master.ID:%v", users[1].ID())
 	aoiObject.Move(users[1])
-	aoiObject.Move(users[3])
-
+	//aoiObject.Move(users[3])
+	time.Sleep(time.Millisecond * 5)
 	aoiObject.Clear()
 }
 
 func tInitAoiAndUsers() (AOI, []*user) {
-	aoiObject := New(option.OptionWith(nil))
+	aoiObject := New(option.OptionWith(&struct{ Radius float32 }{
+		Radius: 10,
+	}))
 
 	users := []*user{
 		newUserWithAoi(aoiObject),

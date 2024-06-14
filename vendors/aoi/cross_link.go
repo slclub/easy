@@ -147,14 +147,13 @@ func (self *crossList) rangeByRadiusDiff(this *containerList, entity Entity) []E
 
 // 距离检查
 func (self *crossList) nearCheck(entity Entity, dest Entity) bool {
-	near := true
 	for i, _ := range self.countArr {
-		near = near && compareRadius(entity.Position()[i], dest.Position()[i], self.radius)
+		near := compareRadius(entity.Position()[i], dest.Position()[i], self.radius)
 		if !near {
 			return near
 		}
 	}
-	return near
+	return true
 }
 
 func (self *crossList) nearOldCheck(entity, dest Entity) bool {

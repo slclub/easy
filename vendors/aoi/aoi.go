@@ -39,6 +39,8 @@ func New(assignment option.Assignment) AOI {
 	assignment.Default(
 		option.OptionFunc(func() (string, any) {
 			return "Axis", []int{0, 1, 2}
+		}), option.OptionFunc(func() (string, any) {
+			return "Log", log.Log()
 		}),
 	)
 	assignment.Apply()
@@ -233,6 +235,7 @@ func (self *AoiArea) move(entity Entity) {
 		increases := []Entity{}
 		moves := []Entity{}
 		decrease := []Entity{}
+		do := false
 		self.cross.RangeByRadiusAll(me, func(other Entity, nearcheck bool) {
 			switch him := other.(type) {
 			case AgentEntity:
@@ -245,7 +248,11 @@ func (self *AoiArea) move(entity Entity) {
 					me.Neighbour().leave(him)
 					ecode = him.Neighbour().leave(me)
 					//}
+					do = true
 				}
+
+				//self.Option().Log.Printf("ME.PID:%v ME.Position:%v near:%v, DIS:%v", me.ID(), me.Position(), nearcheck, len(me.Neighbour().leaveEntitys()))
+				//self.Option().Log.Printf("HIM.ID:%v HIM.Position:%v ecode:%v", him.ID(), him.Position(), ecode)
 				self.handleMessageEvent(ecode, him, me)
 			case Monster:
 				if nearcheck {
@@ -280,14 +287,17 @@ func (self *AoiArea) move(entity Entity) {
 				}
 			}
 		})
-		// 出视野
-		me.AoiMessage().Disappear(me.Neighbour().leaveEntitys())
-		me.AoiMessage().Disappear(decrease)
 
+		if do {
+
+			// 出视野
+			me.AoiMessage().Disappear(me.Neighbour().leaveEntitys())
+			//me.AoiMessage().Disappear(decrease)
+		}
 		// 入视野
 		me.Neighbour().cutIncrease()
 		me.AoiMessage().Appear(me.Neighbour().increaseEntitys())
-		me.AoiMessage().Appear(increases)
+		//me.AoiMessage().Appear(increases)
 	}
 
 }
