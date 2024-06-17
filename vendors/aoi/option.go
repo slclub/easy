@@ -21,6 +21,7 @@ func DefaultOption() *Option {
 	option := &Option{
 		Radius:         DEFAULT_RADIUS,
 		NeighbourCount: DEFAULT_NEIGHBOUR_COUNT,
+		Log:            &logEmpty{},
 	}
 
 	return option

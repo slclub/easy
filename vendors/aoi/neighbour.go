@@ -42,11 +42,12 @@ func NewNeighbour(optfns ...NeighbourConfigFunc) *neighbourCollection {
 	//	NeighbourCount: opt.NeighbourCount * NEIGHBOUR_BEEN_OBSERVE_RATE,
 	//	Radius:         opt.Radius,
 	//})
-	nei.observedSet.master = nei.master
+
 	//nei.beenObservedSet.master = nei.master
 	for _, fn := range optfns {
 		fn(nei)
 	}
+	nei.observedSet.master = nei.master
 	return nei
 }
 

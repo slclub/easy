@@ -243,9 +243,8 @@ func (self *AoiArea) move(entity Entity) {
 				decrease_agents = append(decrease_agents, leaves...)
 				code, _, _ = him.Neighbour().relation(nearcheck, me)
 
-				//self.Option().Log.Printf("ME.PID:%v ME.Position:%v near:%v, DIS:%v", me.ID(), me.Position(), nearcheck, len(me.Neighbour().leaveEntitys()))
-				//self.Option().Log.Printf("HIM.ID:%v HIM.Position:%v ecode:%v", him.ID(), him.Position(), ecode)
 				self.handleMessageEvent(code, him, me)
+				self.Option().Log.Printf("ME.PID:%v ME.Pos:%v him.ID:%v him.Pos:%v near:%v code:%v", me.ID(), me.Position(), him.ID(), him.Position(), nearcheck, code)
 			case Monster:
 				switch nearcheck {
 				case CONST_COORDINATE_MOVE:
