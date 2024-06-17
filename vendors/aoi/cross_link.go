@@ -159,7 +159,7 @@ func (self *crossList) nearCheck(entity Entity, dest Entity) bool {
 func (self *crossList) nearOldCheck(entity, dest Entity) bool {
 	near := true
 	for i, _ := range self.countArr {
-		near = near && compareRadius(entity.PositionOld()[i], dest.PositionOld()[i], self.radius)
+		near = near && compareRadius(entity.PositionOld()[i], dest.Position()[i], self.radius)
 		if !near {
 			return near
 		}

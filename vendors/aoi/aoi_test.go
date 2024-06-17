@@ -65,6 +65,24 @@ func TestMove1(t *testing.T) {
 	aoiObject.Clear()
 }
 
+func TestMove2(t *testing.T) {
+	//log.LEVEL = log8q.ALL_LEVEL
+	//aoiObject, users := tInitAoiAndUsers()
+	//
+	//for i, _ := range users {
+	//	aoiObject.Enter(users[i])
+	//}
+	//time.Sleep(time.Millisecond * 5)
+	//positions := [][]float32{
+	//	[]float32{1, 0, 1},
+	//	[]float32{5, 0, 50},
+	//	[]float32{19.5, 0, 20.2},
+	//}
+	//for i := 0; i < 20; i++ {
+	//
+	//}
+}
+
 func tInitAoiAndUsers() (AOI, []*user) {
 	aoiObject := New(option.OptionWith(&struct{ Radius float32 }{
 		Radius: 10,

@@ -23,10 +23,10 @@ type NeighbourConfigFunc func(collection *neighbourCollection)
 
 // 视野区域集合
 type neighbourCollection struct {
-	master          Entity        //操作的主对象指针
-	observedSet     *neighbourSet // 观察的集合
-	beenObservedSet *neighbourSet // 被观察的集合,一般不做限制
-	opt             *Option
+	master      Entity        //操作的主对象指针
+	observedSet *neighbourSet // 观察的集合
+	//beenObservedSet *neighbourSet // 被观察的集合,一般不做限制
+	opt *Option
 }
 
 func NewNeighbour(optfns ...NeighbourConfigFunc) *neighbourCollection {
@@ -38,12 +38,12 @@ func NewNeighbour(optfns ...NeighbourConfigFunc) *neighbourCollection {
 	}
 
 	nei.observedSet = newneighbourSet(opt)
-	nei.beenObservedSet = newneighbourSet(&Option{
-		NeighbourCount: opt.NeighbourCount * NEIGHBOUR_BEEN_OBSERVE_RATE,
-		Radius:         opt.Radius,
-	})
+	//nei.beenObservedSet = newneighbourSet(&Option{
+	//	NeighbourCount: opt.NeighbourCount * NEIGHBOUR_BEEN_OBSERVE_RATE,
+	//	Radius:         opt.Radius,
+	//})
 	nei.observedSet.master = nei.master
-	nei.beenObservedSet.master = nei.master
+	//nei.beenObservedSet.master = nei.master
 	for _, fn := range optfns {
 		fn(nei)
 	}
@@ -170,10 +170,10 @@ func (nb *neighbourCollection) BindWith(assignment option.Assignment) {
 		assignment.Apply()
 	}
 	nb.observedSet.Option = nb.opt
-	nb.beenObservedSet.Option = &Option{
-		Radius:         nb.opt.Radius,
-		NeighbourCount: nb.opt.NeighbourCount * NEIGHBOUR_BEEN_OBSERVE_RATE,
-	}
+	//nb.beenObservedSet.Option = &Option{
+	//	Radius:         nb.opt.Radius,
+	//	NeighbourCount: nb.opt.NeighbourCount * NEIGHBOUR_BEEN_OBSERVE_RATE,
+	//}
 }
 
 func (nb *neighbourCollection) moveEntitys() []Entity {
@@ -202,12 +202,11 @@ func (nb *neighbourCollection) join(v any) (int, Entity) {
 // 被观察集合 添加
 func (nb *neighbourCollection) beenJoin(v any) int {
 	//return 0 // PPROF.DELETE
-	switch val := v.(type) {
-	case AgentEntity:
-		nb.beenObservedSet.add(val)
-	}
+	//switch val := v.(type) {
+	//case AgentEntity:
+	//	nb.beenObservedSet.add(val)
+	//}
 	//log.Debug("-------beenJoin ID:%v %v %v %v", nb.master.ID(),
-	//	len(nb.beenObservedSet.list_increase), len(nb.beenObservedSet.list_move), len(nb.beenObservedSet.list_leave))
 	return MESSAGE_EVENT_EMPTY
 }
 
@@ -222,10 +221,10 @@ func (nb *neighbourCollection) leave(v any) int {
 }
 
 func (nb *neighbourCollection) beenLeave(v any) int {
-	switch val := v.(type) {
-	case AgentEntity:
-		nb.beenObservedSet.leave(val)
-	}
+	//switch val := v.(type) {
+	//case AgentEntity:
+	//	nb.beenObservedSet.leave(val)
+	//}
 	return MESSAGE_EVENT_EMPTY
 }
 
@@ -265,6 +264,8 @@ func (nb *neighbourCollection) relation(code int, entity Entity) (int, []Entity,
 		rcode = nb.leave(entity)
 		leaves = append(leaves, entity)
 	case CONST_COORDINATE_EMPTY:
+		//rcode = nb.leave(entity)
+		//leaves = append(leaves, entity)
 	}
 	return rcode, adds, leaves
 }
@@ -277,6 +278,7 @@ func (nb *neighbourCollection) relationZero(code int, entity Entity) (int, []Ent
 	case CONST_COORDINATE_LEAVE:
 		leaves = append(leaves, entity)
 	case CONST_COORDINATE_MOVE:
+		break
 	case CONST_COORDINATE_EMPTY:
 	}
 	return code, adds, leaves
