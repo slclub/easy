@@ -313,7 +313,6 @@ func (self *Option) setReflectValue(target reflect.Value, value reflect.Value) {
 			return
 		}
 		target.SetFloat(value.Convert(target.Type()).Float())
-
 	default:
 		target.Set(value)
 	}

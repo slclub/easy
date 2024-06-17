@@ -39,11 +39,13 @@ func New(assignment option.Assignment) AOI {
 	assignment.Default(
 		option.OptionFunc(func() (string, any) {
 			return "Axis", []int{0, 1, 2}
-		}), option.OptionFunc(func() (string, any) {
-			return "Log", log.Log()
 		}),
 	)
 	assignment.Apply()
+	// option 0值不包含指针
+	if a.option.Log == nil {
+		a.option.Log = &logEmpty{}
+	}
 
 	a.cross = newCrossList(option.OptionWith(a.option).Default(
 		option.OptionFunc(func() (string, any) {
