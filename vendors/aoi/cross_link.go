@@ -186,15 +186,15 @@ func (self *crossList) DeleteCache(entity Entity) {
 }
 
 func (self *crossList) RangeByRadius(entity Entity, fn func(other Entity)) {
-	self.RangeByRadiusAll(entity, func(other Entity, check bool) {
-		if !check {
+	self.RangeByRadiusAll(entity, func(other Entity, check int) {
+		if check == CONST_COORDINATE_EMPTY || check == CONST_COORDINATE_LEAVE {
 			return
 		}
 		fn(other)
 	})
 }
 
-func (self *crossList) RangeByRadiusAll(entity Entity, fn func(other Entity, check bool)) {
+func (self *crossList) RangeByRadiusAll(entity Entity, fn func(other Entity, check int)) {
 	minCount := 10000
 	step := self.step()
 	entitys := []Entity{}
@@ -215,12 +215,28 @@ func (self *crossList) RangeByRadiusAll(entity Entity, fn func(other Entity, che
 		//if !self.nearCheck(entity, one) {
 		//	continue
 		//}
-		fn(one, self.nearCheck(entity, one))
+		fn(one, self.compareRelation(entity, one))
 	}
 
 	if step == 0 {
 		self.caculateWeight(minCount)
 	}
+}
+
+func (self *crossList) compareRelation(entity, one Entity) int {
+	near_new := self.nearCheck(entity, one)
+	near_old := self.nearOldCheck(entity, one)
+
+	if near_old && near_new {
+		return CONST_COORDINATE_MOVE
+	}
+	if near_new && near_old == false {
+		return CONST_COORDINATE_INCREASE
+	}
+	if near_new == false && near_old == true {
+		return CONST_COORDINATE_LEAVE
+	}
+	return CONST_COORDINATE_EMPTY
 }
 
 func (self *crossList) RangeByRadiusDiff(entity Entity, fn func(other Entity)) {

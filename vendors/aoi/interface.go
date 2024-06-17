@@ -55,26 +55,20 @@ type Npc interface {
 
 type Neighbour interface {
 	neighbourInternel
-	RangeIncrease(fn func(entity Entity) bool)
 	RangeMove(fn func(entity Entity) bool)
-	RangeLeave(fn func(entity Entity) bool)
 	RangeBeenObservedSet(fn func(entity Entity) bool)
 }
 
 // This module was born solely for the convenience of interal code invoked.
 type neighbourInternel interface {
-	join(v any) int
+	join(v any) (int, Entity)
 	beenJoin(v any) int
 	leave(v any) int
 	beenLeave(v any) int
+	relation(int, Entity) (int, []Entity, []Entity)
 	// v:nil将 move和increase 集合的entity 移动到 leave集合中
 	// v:clean 将increase 合并到move集合，清空 leave 和 increase 集合
-	reset(v any)
-	clear()
-	increaseEntitys() []Entity
 	moveEntitys() []Entity
-	leaveEntitys() []Entity
-	cutIncrease()
 }
 
 // It is the mainly interface of AOI
@@ -124,3 +118,16 @@ type AoiMessage interface {
 type NeighbourWeight interface {
 	Value(entiry, master Entity) int
 }
+
+const (
+	MESSAGE_EVENT_EMPTY     = 0
+	MESSAGE_EVENT_APPEAR    = 1
+	MESSAGE_EVENT_DISAPPEAR = 2
+	MESSAGE_EVENT_MOVE      = 3
+
+	// 十字连表 坐标计算状态
+	CONST_COORDINATE_EMPTY    = 0
+	CONST_COORDINATE_INCREASE = 1
+	CONST_COORDINATE_MOVE     = 2
+	CONST_COORDINATE_LEAVE    = 3
+)
