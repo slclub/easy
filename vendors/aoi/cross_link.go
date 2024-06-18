@@ -1,7 +1,9 @@
 package aoi
 
 import (
+	"github.com/slclub/easy/log"
 	"github.com/slclub/easy/vendors/option"
+	"github.com/slclub/go-tips/logf"
 )
 
 //Orthogonal list
@@ -15,6 +17,7 @@ type crossList struct {
 	stepWeight int // 计算权重的步数
 	countArr   []int
 	radius     float32
+	Log        logf.Logger
 }
 
 func newCrossList(assignment option.Assignment) *crossList {
@@ -72,7 +75,7 @@ func (self *crossList) step() int {
 func (self *crossList) rangeByRadius(this *containerList, entity Entity) []Entity {
 	index_start, index_end := this.getSentinelIndex(entity, self.radius)
 	node_start := this.getLatestNode(index_start)
-
+	//self.Log.Printf("Radius PID:%v index_start:%v index_end:%v node_start:%v", entity.ID(), index_start, index_end, node_start)
 	if node_start == nil {
 		return nil
 	}
@@ -223,10 +226,21 @@ func (self *crossList) RangeByRadiusAll(entity Entity, fn func(other Entity, che
 	}
 }
 
+func (self *crossList) RangeByAll(entity Entity, fn func(other Entity, check int)) {
+	self.lists[0].Range(func(other Entity) bool {
+		if entity.ID() == other.ID() {
+			return true
+		}
+		fn(other, CONST_COORDINATE_MOVE)
+		return true
+	})
+}
+
 func (self *crossList) compareRelation(entity, one Entity) int {
 	near_new := self.nearCheck(entity, one)
 	near_old := self.nearOldCheck(entity, one)
 
+	log.Debug("compare PID:%v new:%v old:%v  pos:%v opos:%v", entity.ID(), near_new, near_old, entity.Position(), entity.PositionOld())
 	if near_old && near_new {
 		return CONST_COORDINATE_MOVE
 	}

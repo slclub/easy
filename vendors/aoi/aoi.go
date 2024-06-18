@@ -54,6 +54,9 @@ func New(assignment option.Assignment) AOI {
 		option.OptionFunc(func() (string, any) {
 			return "Radius", DEFAULT_RADIUS
 		}),
+		option.OptionFunc(func() (string, any) {
+			return "Log", a.option.Log
+		}),
 		handleNewListWithAxis(a.option.Axis),
 		option.DEFAULT_IGNORE_ZERO,
 	))
@@ -237,7 +240,8 @@ func (self *AoiArea) move(entity Entity) {
 	case AgentEntity:
 		increases_agents, increases := []Entity{}, []Entity{}
 		decrease_agents, decrease := []Entity{}, []Entity{}
-		self.cross.RangeByRadiusAll(me, func(other Entity, nearcheck int) {
+		//self.cross.RangeByRadiusAll(me, func(other Entity, nearcheck int) {
+		self.cross.RangeByAll(me, func(other Entity, nearcheck int) {
 			switch him := other.(type) {
 			case AgentEntity:
 				code, adds, leaves := me.Neighbour().relation(nearcheck, him)
