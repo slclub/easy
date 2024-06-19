@@ -106,7 +106,7 @@ func (self *Server) register() {
 		self.registerSoon()
 		select {
 		case <-ticker.C:
-
+		case <-self.LeaseKeepAliveResponse:
 		}
 	}
 }
