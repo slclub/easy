@@ -3,6 +3,7 @@ package aoi
 import (
 	"github.com/slclub/easy/log"
 	"github.com/slclub/easy/vendors/option"
+	"github.com/slclub/go-tips/logf"
 	"github.com/slclub/log8q"
 	"testing"
 	"time"
@@ -84,8 +85,12 @@ func TestMove2(t *testing.T) {
 }
 
 func tInitAoiAndUsers() (AOI, []*user) {
-	aoiObject := New(option.OptionWith(&struct{ Radius float32 }{
+	aoiObject := New(option.OptionWith(&struct {
+		Radius float32
+		Log    logf.Logger
+	}{
 		Radius: 10,
+		Log:    log.Log(),
 	}))
 
 	users := []*user{

@@ -187,7 +187,7 @@ func (nb *neighbourCollection) RangeMove(fn func(entity Entity) bool) {
 
 // --internal
 
-func (nb *neighbourCollection) join(v any) (int, Entity) {
+func (nb *neighbourCollection) join(v any) int {
 	//return 0 // PPROF.DELETE
 	switch val := v.(type) {
 	case AgentEntity:
@@ -195,9 +195,9 @@ func (nb *neighbourCollection) join(v any) (int, Entity) {
 		if meCode == MESSAGE_EVENT_APPEAR {
 			val.Neighbour().beenJoin(nb.master)
 		}
-		return meCode, nil
+		return meCode
 	}
-	return MESSAGE_EVENT_EMPTY, nil
+	return MESSAGE_EVENT_EMPTY
 }
 
 // 被观察集合 添加
@@ -233,56 +233,39 @@ func (nb *neighbourCollection) beenLeave(v any) int {
 // @return 1 关系值
 // @return 2 增加的集合
 // @return 3 删除的集合
-func (nb *neighbourCollection) relation(code int, entity Entity) (int, []Entity, []Entity) {
-	if nb.opt.NeighbourCount == 0 {
-		return nb.relationZero(code, entity)
-	}
+func (nb *neighbourCollection) relation(code int, entity Entity, fu func(rocde int)) int {
+
 	rcode := MESSAGE_EVENT_EMPTY
-	adds, leaves := []Entity{}, []Entity{}
+	//adds, leaves := []Entity{}, []Entity{}
 	switch code {
 	case CONST_COORDINATE_INCREASE:
-		rrcode, leave_entity := nb.join(entity)
+		rrcode := nb.join(entity)
 		rcode = rrcode
-		if leave_entity != nil {
-			leaves = append(leaves, leave_entity)
-		}
-		switch rcode {
-		case MESSAGE_EVENT_APPEAR:
-			adds = append(adds, entity)
-		}
+
+		//switch rcode {
+		//case MESSAGE_EVENT_APPEAR:
+		//	//adds = append(adds, entity)
+		//}
 	case CONST_COORDINATE_MOVE:
-		rrcode, leave_entity := nb.join(entity)
+		rrcode := nb.join(entity)
 		rcode = rrcode
-		if leave_entity != nil {
-			leaves = append(leaves, leave_entity)
-		}
-		switch rcode {
-		case MESSAGE_EVENT_APPEAR:
-			adds = append(adds, entity)
-		case MESSAGE_EVENT_MOVE:
-		}
+
+		//switch rcode {
+		//case MESSAGE_EVENT_APPEAR:
+		//	//adds = append(adds, entity)
+		//case MESSAGE_EVENT_MOVE:
+		//}
 	case CONST_COORDINATE_LEAVE:
 		rcode = nb.leave(entity)
-		leaves = append(leaves, entity)
+		//leaves = append(leaves, entity)
 	case CONST_COORDINATE_EMPTY:
 		//rcode = nb.leave(entity)
 		//leaves = append(leaves, entity)
 	}
-	return rcode, adds, leaves
-}
-
-func (nb *neighbourCollection) relationZero(code int, entity Entity) (int, []Entity, []Entity) {
-	adds, leaves := []Entity{}, []Entity{}
-	switch code {
-	case CONST_COORDINATE_INCREASE:
-		adds = append(adds, entity)
-	case CONST_COORDINATE_LEAVE:
-		leaves = append(leaves, entity)
-	case CONST_COORDINATE_MOVE:
-		break
-	case CONST_COORDINATE_EMPTY:
+	if fu != nil {
+		fu(rcode)
 	}
-	return code, adds, leaves
+	return rcode
 }
 
 func (nb *neighbourCollection) RangeBeenObservedSet(fn func(entity Entity) bool) {

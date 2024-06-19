@@ -23,7 +23,7 @@ func handleNewListWithAxis(axisArr []int) option.OptionFunc {
 	return func() (string, any) {
 		lists := []*containerList{}
 		for _, axis := range axisArr {
-			lists = append(lists, newContainerList(handleIndexForList(axis)))
+			lists = append(lists, newContainerList(handleIndexForList(axis), axis))
 		}
 		return "Lists", lists
 	}

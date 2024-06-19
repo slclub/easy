@@ -61,11 +61,11 @@ type Neighbour interface {
 
 // This module was born solely for the convenience of interal code invoked.
 type neighbourInternel interface {
-	join(v any) (int, Entity)
+	join(v any) int
 	beenJoin(v any) int
 	leave(v any) int
 	beenLeave(v any) int
-	relation(int, Entity) (int, []Entity, []Entity)
+	relation(int, Entity, func(rcode int)) int
 	// v:nil将 move和increase 集合的entity 移动到 leave集合中
 	// v:clean 将increase 合并到move集合，清空 leave 和 increase 集合
 	moveEntitys() []Entity

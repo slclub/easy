@@ -28,13 +28,15 @@ type Server struct {
 	Namespace    string
 	server       *grpc.Server
 	waiter
-	greeterHandle []func(*grpc.Server)
+	greeterHandle          []func(*grpc.Server)
+	LeaseKeepAliveResponse <-chan *clientv3.LeaseKeepAliveResponse
 }
 
 func NewServer(assignment option.Assignment) *Server {
 	ser := &Server{
-		waiter:        waiter{make(chan os.Signal)},
-		greeterHandle: []func(*grpc.Server){},
+		waiter:                 waiter{make(chan os.Signal)},
+		greeterHandle:          []func(*grpc.Server){},
+		LeaseKeepAliveResponse: make(<-chan *clientv3.LeaseKeepAliveResponse),
 	}
 	assignment.Target(ser)
 	assignment.Default(option.OptionFunc(func() (string, any) {
@@ -102,7 +104,10 @@ func (self *Server) register() {
 	// do while
 	for {
 		self.registerSoon()
-		<-ticker.C
+		select {
+		case <-ticker.C:
+
+		}
 	}
 }
 
@@ -143,14 +148,13 @@ func (self *Server) keepAlive() error {
 	if err != nil {
 		return err
 	}
-
+	self.LeaseKeepAliveResponse = channelLeaseAlive
 	// clear keep alive channel
-	// TODO read the response.
-	go func() {
-		for {
-			<-channelLeaseAlive
-		}
-	}()
+	//go func() {
+	//	for {
+	//		<-channelLeaseAlive
+	//	}
+	//}()
 	return nil
 }
 

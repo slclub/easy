@@ -1,7 +1,6 @@
 package aoi
 
 import (
-	"github.com/slclub/easy/log"
 	"github.com/slclub/easy/vendors/option"
 	"github.com/slclub/go-tips/logf"
 )
@@ -40,33 +39,6 @@ func newCrossList(assignment option.Assignment) *crossList {
 	return c
 }
 
-// 计算权重
-func (self *crossList) caculateWeightOne(obj *containerList, count, min int) {
-	switch count / min {
-	case 0:
-		obj.state = CONST_CONTAINER_WEIGHT_WORK
-	case 1:
-		obj.state = CONST_CONTAINER_WEIGHT_WORK
-	case 2:
-		obj.state = CONST_CONTAINER_WEIGHT_2
-	case 3:
-		obj.state = CONST_CONTAINER_WEIGHT_3
-	case 4:
-		obj.state = CONST_CONTAINER_WEIGHT_4
-	default:
-		obj.state = CONST_CONTAINER_WEIGHT_MORE
-	}
-}
-
-func (self *crossList) caculateWeight(min int) {
-	if min <= 0 {
-		min = 1
-	}
-	for i, cl := range self.lists {
-		self.caculateWeightOne(cl, self.countArr[i], min)
-	}
-}
-
 func (self *crossList) step() int {
 	self.stepWeight = (self.stepWeight + 1) % CONST_CROSS_STEP
 	return self.stepWeight
@@ -79,6 +51,7 @@ func (self *crossList) rangeByRadius(this *containerList, entity Entity) []Entit
 	if node_start == nil {
 		return nil
 	}
+	this.ResetRate(true)
 	es := []Entity{}
 	for node_start.Index() <= index_end {
 		other := node_start.Value().(Entity)
@@ -88,6 +61,10 @@ func (self *crossList) rangeByRadius(this *containerList, entity Entity) []Entit
 		}
 		//logq.DebugF("AOI.RANGE.BY PID:=%v entity.start:=%v, endtity.end:=%v, other.v:=%v", entity.GetEntityID(), index_start, index_end, node_start.Index())
 		es = append(es, other)
+		// 计算 玩家平均间隔 rate
+		if l := len(es); l >= 2 {
+			this.AutoRate(es[l-2], other)
+		}
 	NEXT:
 		node_start = node_start.Next()
 		if node_start == nil {
@@ -198,32 +175,42 @@ func (self *crossList) RangeByRadius(entity Entity, fn func(other Entity)) {
 }
 
 func (self *crossList) RangeByRadiusAll(entity Entity, fn func(other Entity, check int)) {
-	minCount := 10000
-	step := self.step()
-	entitys := []Entity{}
-	for i, cl := range self.lists {
-		if cl.state != CONST_CONTAINER_WEIGHT_WORK && step != 0 {
-			continue
-		}
-		es := self.rangeByRadius(cl, entity)
-		self.countArr[i] = len(es)
-		if minCount > len(es) {
-			minCount = len(es)
-			entitys = es
-		}
-	}
+	cl := self.choose(entity)
+	entity_arr := self.rangeByRadius(cl, entity)
 
-	for _, one := range entitys {
+	for _, one := range entity_arr {
 		//// 计算  另外的坐标系
 		//if !self.nearCheck(entity, one) {
 		//	continue
 		//}
 		fn(one, self.compareRelation(entity, one))
 	}
+}
 
-	if step == 0 {
-		self.caculateWeight(minCount)
+func (self *crossList) choose(entity Entity) *containerList {
+	stepnum := self.step()
+	var cli *containerList
+	var used = 0
+	for i, cl := range self.lists {
+		if cli == nil {
+			cli = cl
+			used = i
+			continue
+		}
+		if cli.Rate() > cl.Rate() {
+			cli = cl
+			used = i
+		}
 	}
+	if stepnum == 0 {
+		for i, cl := range self.lists {
+			if i == used {
+				continue
+			}
+			self.rangeByRadius(cl, entity)
+		}
+	}
+	return cli
 }
 
 func (self *crossList) RangeByAll(entity Entity, fn func(other Entity, check int)) {
@@ -240,7 +227,7 @@ func (self *crossList) compareRelation(entity, one Entity) int {
 	near_new := self.nearCheck(entity, one)
 	near_old := self.nearOldCheck(entity, one)
 
-	log.Debug("compare PID:%v new:%v old:%v  pos:%v opos:%v", entity.ID(), near_new, near_old, entity.Position(), entity.PositionOld())
+	//log.Debug("compare PID:%v new:%v old:%v  pos:%v opos:%v", entity.ID(), near_new, near_old, entity.Position(), entity.PositionOld())
 	if near_old && near_new {
 		return CONST_COORDINATE_MOVE
 	}
@@ -254,18 +241,11 @@ func (self *crossList) compareRelation(entity, one Entity) int {
 }
 
 func (self *crossList) RangeByRadiusDiff(entity Entity, fn func(other Entity)) {
-	entitys := []Entity{}
-	for i, cl := range self.lists {
-		if cl.state != CONST_CONTAINER_WEIGHT_WORK {
-			continue
-		}
-		es := self.rangeByRadiusDiff(cl, entity)
-		self.countArr[i] = len(es)
-		if len(entitys) > len(es) {
-			entitys = es
-		}
-	}
-	for _, one := range entitys {
+	cl := self.choose(entity)
+
+	entity_arr := self.rangeByRadius(cl, entity)
+
+	for _, one := range entity_arr {
 		fn(one)
 	}
 }

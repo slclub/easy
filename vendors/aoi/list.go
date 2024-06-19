@@ -1,6 +1,9 @@
 package aoi
 
-import "github.com/slclub/skiplist"
+import (
+	"github.com/slclub/go-tips"
+	"github.com/slclub/skiplist"
+)
 
 const (
 	AXIS_X = 0 // x 坐标轴
@@ -12,7 +15,7 @@ const (
 
 	DEFAULT_SKIP_LINK_LEVEL = 10
 
-	CONST_CONTAINER_WEIGHT_WORK = 1
+	CONST_CONTAINER_WEIGHT_WORK = 1 // 最小查找
 	CONST_CONTAINER_WEIGHT_2    = 2
 	CONST_CONTAINER_WEIGHT_3    = 3
 	CONST_CONTAINER_WEIGHT_4    = 4
@@ -40,15 +43,19 @@ type HandleIndexFunc func(entity Entity) (uint64, uint64)
 type containerList struct {
 	list   *skiplist.ConcurrentSkipList
 	handle HandleIndexFunc
-	state  int // default: CONST_CONTAINER_WEIGHT_WORK
+	state  int   // default: CONST_CONTAINER_WEIGHT_WORK
+	rate   []int // 覆盖率
+	axis   int
 }
 
-func newContainerList(handle HandleIndexFunc) *containerList {
+func newContainerList(handle HandleIndexFunc, axis int) *containerList {
 	skip, _ := skiplist.NewConcurrentSkipList(DEFAULT_SKIP_LINK_LEVEL)
 	return &containerList{
 		list:   skip,
 		handle: handle,
+		axis:   axis,
 		state:  CONST_CONTAINER_WEIGHT_WORK,
+		rate:   []int{0, 0},
 	}
 }
 
@@ -105,6 +112,28 @@ func (this *containerList) Range(fn func(entity Entity) bool) {
 	})
 }
 
+func (this *containerList) ResetRate(reset bool) {
+	this.rate[0] = 1
+	this.rate[1] = 0
+}
+
 func (this *containerList) Len() int32 {
 	return this.list.Length()
+}
+
+func (this *containerList) Index() int {
+	return this.axis
+}
+
+func (this *containerList) AutoRate(entity, entity2 Entity) {
+	this.rate[0]++ // 数量
+	long := tips.Int(entity2.Position()[this.Index()]*1000 - entity.Position()[this.Index()]*1000)
+	if long < 0 {
+		long *= -1
+	}
+	this.rate[1] += long
+}
+
+func (this *containerList) Rate() float32 {
+	return float32(this.rate[1]) / float32(this.rate[0])
 }

@@ -139,31 +139,32 @@ func (self *AoiArea) enter(entity Entity) {
 	self.cross.Delete(entity)
 	self.cross.Add(entity)
 
-	arr, leave_arr := []Entity{}, []Entity{}
+	arr := []Entity{}
 	// 查询半径范围内Entity
 	switch me := entity.(type) {
 	case AgentEntity:
 		self.cross.RangeByRadius(entity, func(other Entity) {
-			// 处理玩家邻居
-			ecode, leave_entity := me.Neighbour().join(other)
-			if ecode == MESSAGE_EVENT_APPEAR {
+			if self.Option().NeighbourCount == 0 {
 				arr = append(arr, other)
+			} else {
+				// 处理玩家邻居
+				ecode := me.Neighbour().join(other)
+				if ecode == MESSAGE_EVENT_APPEAR {
+					arr = append(arr, other)
+				}
 			}
-			if leave_entity != nil {
-				leave_arr = append(leave_arr, leave_entity)
-			}
+
 			switch him := other.(type) {
 			case AgentEntity:
-				eecode, him_leave_entity := him.Neighbour().join(me)
-				self.handleMessageEvent(eecode, him, me)
-				if him_leave_entity != nil {
-					him.AoiMessage().Disappear([]Entity{him_leave_entity})
+				if self.Option().NeighbourCount == 0 {
+					him.AoiMessage().Appear([]Entity{me})
+				} else {
+					eecode := him.Neighbour().join(me)
+					self.handleMessageEvent(eecode, him, me)
 				}
 			case Monster:
-				arr = append(arr, him)
 				him.AoiMessage().Appear([]Entity{me})
 			case Npc:
-				arr = append(arr, him)
 				him.AoiMessage().Appear([]Entity{me})
 			}
 		})
@@ -198,14 +199,23 @@ func (self *AoiArea) leave(entity Entity) {
 	switch me := entity.(type) {
 	case AgentEntity:
 		self.cross.RangeByRadius(entity, func(other Entity) {
-			mcode := me.Neighbour().leave(other)
-			if mcode == MESSAGE_EVENT_DISAPPEAR {
+			if self.Option().NeighbourCount == 0 {
 				arr = append(arr, other)
+			} else {
+				mcode := me.Neighbour().leave(other)
+				if mcode == MESSAGE_EVENT_DISAPPEAR {
+					arr = append(arr, other)
+				}
 			}
+
 			switch him := other.(type) {
 			case AgentEntity:
-				ecode := him.Neighbour().leave(me)
-				self.handleMessageEvent(ecode, him, me)
+				if self.option.NeighbourCount == 0 {
+					him.AoiMessage().Disappear([]Entity{me})
+				} else {
+					ecode := him.Neighbour().leave(me)
+					self.handleMessageEvent(ecode, him, me)
+				}
 			case Monster:
 				arr = append(arr, him)
 				him.AoiMessage().Disappear([]Entity{me})
@@ -241,41 +251,52 @@ func (self *AoiArea) move(entity Entity) {
 		increases_agents, increases := []Entity{}, []Entity{}
 		decrease_agents, decrease := []Entity{}, []Entity{}
 		//self.cross.RangeByRadiusAll(me, func(other Entity, nearcheck int) {
-		self.cross.RangeByAll(me, func(other Entity, nearcheck int) {
+		self.cross.RangeByRadiusAll(me, func(other Entity, nearcheck int) {
 			switch him := other.(type) {
 			case AgentEntity:
-				code, adds, leaves := me.Neighbour().relation(nearcheck, him)
-				increases_agents = append(increases_agents, adds...)
-				decrease_agents = append(decrease_agents, leaves...)
-				code, _, _ = him.Neighbour().relation(nearcheck, me)
-
-				self.handleMessageEvent(code, him, me)
-				self.Option().Log.Printf("ME.PID:%v ME.Pos:%v him.ID:%v him.Pos:%v near:%v code:%v", me.ID(), me.Position(), him.ID(), him.Position(), nearcheck, code)
-			case Monster:
-				switch nearcheck {
-				case CONST_COORDINATE_MOVE:
-					//self.handleMessageEvent(MESSAGE_EVENT_MOVE, him, me)
-					him.AoiMessage().Move([]Entity{me})
-				case CONST_COORDINATE_INCREASE:
-					increases = append(increases, him)
-					him.AoiMessage().Appear([]Entity{me})
-				case CONST_COORDINATE_LEAVE:
-					him.AoiMessage().Disappear([]Entity{me})
-					decrease = append(decrease, him)
+				if self.Option().NeighbourCount == 0 {
+					self.handleWithCoordinate(nearcheck, him, me, func() {
+						switch nearcheck {
+						case CONST_COORDINATE_INCREASE:
+							increases_agents = append(increases_agents, him)
+						case CONST_COORDINATE_LEAVE:
+							decrease_agents = append(decrease_agents, him)
+						}
+					})
+				} else {
+					me.Neighbour().relation(nearcheck, him, func(rcode int) {
+						switch rcode {
+						case MESSAGE_EVENT_APPEAR:
+							increases_agents = append(increases_agents, him)
+						case MESSAGE_EVENT_DISAPPEAR:
+							decrease_agents = append(decrease_agents, him)
+						}
+					})
+					him.Neighbour().relation(nearcheck, me, func(rcode int) {
+						self.handleMessageEvent(rcode, him, me)
+					})
 				}
+
+				self.Option().Log.Printf("ME.PID:%v ME.Pos:%v him.ID:%v him.Pos:%v near:%v", me.ID(), me.Position(), him.ID(), him.Position(), nearcheck)
+			case Monster:
+				self.handleWithCoordinate(nearcheck, him, me, func() {
+					switch nearcheck {
+					case CONST_COORDINATE_INCREASE:
+						increases = append(increases, him)
+					case CONST_COORDINATE_LEAVE:
+						decrease = append(decrease, him)
+					}
+				})
 
 			case Npc:
-				switch nearcheck {
-				case CONST_COORDINATE_MOVE:
-					//self.handleMessageEvent(MESSAGE_EVENT_MOVE, him, me)
-					him.AoiMessage().Move([]Entity{me})
-				case CONST_COORDINATE_INCREASE:
-					increases = append(increases, him)
-					him.AoiMessage().Appear([]Entity{me})
-				case CONST_COORDINATE_LEAVE:
-					him.AoiMessage().Disappear([]Entity{me})
-					decrease = append(decrease, him)
-				}
+				self.handleWithCoordinate(nearcheck, him, me, func() {
+					switch nearcheck {
+					case CONST_COORDINATE_INCREASE:
+						increases = append(increases, him)
+					case CONST_COORDINATE_LEAVE:
+						decrease = append(decrease, him)
+					}
+				})
 			}
 		})
 
@@ -286,7 +307,18 @@ func (self *AoiArea) move(entity Entity) {
 		me.AoiMessage().Appear(increases_agents)
 		//me.AoiMessage().Appear(increases)
 	}
+}
 
+func (self *AoiArea) handleWithCoordinate(nearcheck int, target, from Entity, fn func()) {
+	switch nearcheck {
+	case CONST_COORDINATE_MOVE:
+		target.AoiMessage().Move([]Entity{from})
+	case CONST_COORDINATE_INCREASE:
+		target.AoiMessage().Appear([]Entity{from})
+	case CONST_COORDINATE_LEAVE:
+		target.AoiMessage().Disappear([]Entity{from})
+	}
+	fn()
 }
 
 func (self *AoiArea) handleMessageEvent(ecode int, target, from AgentEntity) {

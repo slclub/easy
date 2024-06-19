@@ -5,31 +5,37 @@ import (
 	"github.com/slclub/easy/vendors/option"
 	"math"
 	"testing"
+	"time"
 )
 
 func TestCrossList(t *testing.T) {
 	cross := initCrosslink()
 	obj1 := newObjectTest()
 	obj2 := newObjectTest()
+	obj3 := newObjectTest()
 	obj1.MessageUser = &messageUser{}
 	obj2.MessageUser = &messageUser{}
+	obj3.MessageUser = &messageUser{}
 
 	obj1.Position(2.6, 1, -4)
 	obj1.Position(2.6, 1, -4)
 	obj2.Position(0.3, 1, -6)
 	obj2.Position(0.3, 1, -6)
+
+	obj3.Position(26, 1, -10)
 
 	log.Info("cross init %v", cross.radius)
-	//for i := 0; i < 100; i++ {
-	//	ob := obj1
-	//	if i%2 == 0 {
-	//		ob = obj2
-	//		recalue(obj2, i)
-	//
-	//	}
-	//	time.Sleep(time.Millisecond * 1)
-	//	testMockCrossMove(cross, ob)
-	//}
+	testMockCrossMove(cross, obj3)
+	for i := 0; i < 100; i++ {
+		ob := obj1
+		if i%2 == 0 {
+			ob = obj2
+			recalue(obj2, i)
+
+		}
+		time.Sleep(time.Millisecond * 1)
+		testMockCrossMove(cross, ob)
+	}
 
 }
 
