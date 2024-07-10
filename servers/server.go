@@ -62,7 +62,6 @@ func (self *Server) Init(assignment option.Assignment) {
 }
 
 func (self *Server) startBefore() {
-
 	self.connOption = &conns.Option{
 		Encrypt:   self.Router().Encoder(),
 		MaxMsgLen: self.MaxMsgLen,

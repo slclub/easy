@@ -29,7 +29,9 @@ func NewWSServer() *WSServer {
 
 func (self *WSServer) Start() {
 	self.startBefore()
-
+	self.upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
 	handleHttp := &WebSocketHandle{
 		server: self,
 		handle: dealHandle(&self.Server),
