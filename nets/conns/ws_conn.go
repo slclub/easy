@@ -1,6 +1,7 @@
 package conns
 
 import (
+	"crypto/tls"
 	"errors"
 	"github.com/gorilla/websocket"
 	"github.com/slclub/easy/log"
@@ -69,8 +70,12 @@ func (self *WSConn) LoopRecv(handle Handle) {
 
 func (wsConn *WSConn) doDestroy() {
 	ccn := wsConn.conn
-	if ccn != nil {
-		ccn.UnderlyingConn().(*net.TCPConn).SetLinger(0)
+	if wsConn.conn != nil {
+		switch con := ccn.UnderlyingConn().(type) {
+		case *net.TCPConn:
+			con.SetLinger(0)
+		case *tls.Conn:
+		}
 		ccn.Close()
 	}
 

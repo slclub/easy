@@ -59,6 +59,7 @@ type WebSocketHandle struct {
 func (self *WebSocketHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", 405)
+		log.Debug("Method not allowed: %v", 405)
 		return
 	}
 	conn, err := self.server.upgrader.Upgrade(w, r, nil)

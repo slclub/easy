@@ -1,6 +1,7 @@
 package conns
 
 import (
+	"crypto/tls"
 	"github.com/slclub/easy/log"
 	"net"
 )
@@ -50,7 +51,12 @@ func (self *TCPConn) loopSend() {
 }
 
 func (self *TCPConn) doDestroy() {
-	self.conn.(*net.TCPConn).SetLinger(0)
+	switch con := self.conn.(type) {
+	case *net.TCPConn:
+		con.SetLinger(0)
+	case *tls.Conn:
+		//con.Set
+	}
 	self.conn.Close()
 
 	if !self.closeFlag {

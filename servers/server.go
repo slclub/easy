@@ -72,7 +72,7 @@ func (self *Server) startBefore() {
 	if err != nil {
 		log.Fatal("Listen error: %v", err)
 	}
-	if self.CertFile != "" || self.KeyFile != "" {
+	if self.CertFile != "" && self.KeyFile != "" {
 		config := &tls.Config{}
 		config.NextProtos = []string{"http/1.1"}
 
