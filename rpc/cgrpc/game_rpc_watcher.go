@@ -3,7 +3,6 @@ package cgrpc
 import (
 	"context"
 	"github.com/slclub/easy/log"
-	"github.com/slclub/easy/rpc/etcd"
 	"github.com/slclub/easy/vendors/option"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc/resolver"
@@ -13,11 +12,13 @@ import (
 type etcdWatcher struct {
 	scheme  string
 	cluster *GameRpcCluster
+	client  *clientv3.Client
 }
 
-func NewGameEtcdWatcher(scheme string) *etcdWatcher {
+func NewGameEtcdWatcher(scheme string, client *clientv3.Client) *etcdWatcher {
 	return &etcdWatcher{
 		scheme: scheme,
+		client: client,
 	}
 }
 
@@ -27,7 +28,7 @@ func (self *etcdWatcher) Scheme() string {
 
 func (self *etcdWatcher) Watch(target resolver.Target, ggcc GameClientClusterInterface, assignment option.Assignment) (Resolver, error) {
 	prefix := self.pathPrefix(target)
-	resp, err := etcd.EClient().Get(context.Background(), prefix, clientv3.WithPrefix())
+	resp, err := self.client.Get(context.Background(), prefix, clientv3.WithPrefix())
 
 	if err != nil {
 		log.Error("GRPC client get server list error:", err)
@@ -42,7 +43,7 @@ func (self *etcdWatcher) Watch(target resolver.Target, ggcc GameClientClusterInt
 	ggcc.UpdateState(servInfos)
 
 	// 监听服务列表
-	watchChan := etcd.EClient().Watch(context.Background(), prefix, clientv3.WithPrefix())
+	watchChan := self.client.Watch(context.Background(), prefix, clientv3.WithPrefix())
 	for respWathc := range watchChan {
 		for _, ev := range respWathc.Events {
 			o := ev.Kv

@@ -30,6 +30,7 @@ type Server struct {
 	waiter
 	greeterHandle          []func(*grpc.Server)
 	LeaseKeepAliveResponse <-chan *clientv3.LeaseKeepAliveResponse
+	client                 *clientv3.Client
 }
 
 func NewServer(assignment option.Assignment) *Server {
@@ -37,6 +38,7 @@ func NewServer(assignment option.Assignment) *Server {
 		waiter:                 waiter{make(chan os.Signal)},
 		greeterHandle:          []func(*grpc.Server){},
 		LeaseKeepAliveResponse: make(<-chan *clientv3.LeaseKeepAliveResponse),
+		client:                 etcd.EClient(),
 	}
 	assignment.Target(ser)
 	assignment.Default(option.OptionFunc(func() (string, any) {
@@ -112,7 +114,7 @@ func (self *Server) register() {
 }
 
 func (self *Server) registerSoon() {
-	resp, err := etcd.EClient().Get(context.Background(), self.pathKey(self.pathName, self.Addr))
+	resp, err := self.client.Get(context.Background(), self.pathKey(self.pathName, self.Addr))
 	if err != nil {
 		log.Fatal("GRPC get server info from etcd error:%v", err)
 		return
@@ -129,7 +131,7 @@ func (self *Server) registerSoon() {
 
 func (self *Server) keepAlive() error {
 	// create lease
-	leaseResp, err := etcd.EClient().Grant(context.Background(), self.TTL)
+	leaseResp, err := self.client.Grant(context.Background(), self.TTL)
 	if err != nil {
 		return err
 	}
@@ -137,14 +139,14 @@ func (self *Server) keepAlive() error {
 	// register the service to etcd.
 	key := self.pathKey(self.pathName, self.Addr)
 
-	_, err = etcd.EClient().Put(context.Background(), key, self.pathValue(self.Addr, self.AddrToClient, self.GetID()), clientv3.WithLease(leaseResp.ID))
+	_, err = self.client.Put(context.Background(), key, self.pathValue(self.Addr, self.AddrToClient, self.GetID()), clientv3.WithLease(leaseResp.ID))
 	if err != nil {
 		return err
 	}
 	log.Info("GRPC havs successfully registered it to etcd %v", key)
 
 	// keep alive with etcd
-	channelLeaseAlive, err := etcd.EClient().KeepAlive(context.Background(), leaseResp.ID)
+	channelLeaseAlive, err := self.client.KeepAlive(context.Background(), leaseResp.ID)
 	if err != nil {
 		return err
 	}
@@ -187,5 +189,5 @@ func (self *Server) pathKey(args ...string) string {
 }
 
 func (self *Server) Delete() {
-	etcd.EClient().Delete(context.Background(), self.pathKey(self.pathName, self.Addr))
+	self.client.Delete(context.Background(), self.pathKey(self.pathName, self.Addr))
 }

@@ -3,7 +3,9 @@ package cgrpc
 import (
 	"errors"
 	"github.com/slclub/easy/log"
+	"github.com/slclub/easy/rpc/etcd"
 	"github.com/slclub/easy/vendors/option"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/resolver"
@@ -18,15 +20,16 @@ type GameRpcCluster struct {
 	pathName  string
 	namespace string
 	waiter
+	client *clientv3.Client
 }
 
 func NewGameGrpcCluster(assignment option.Assignment) *GameRpcCluster {
 	g := &GameRpcCluster{
-		gconns:  []*GameGrpcConn{},
-		watcher: NewGameEtcdWatcher("easy"),
+		gconns: []*GameGrpcConn{},
 		waiter: waiter{
 			wait: make(chan os.Signal),
 		},
+		client: etcd.EClient(),
 	}
 	defer g.Start()
 
@@ -36,7 +39,7 @@ func NewGameGrpcCluster(assignment option.Assignment) *GameRpcCluster {
 	assignment.Target(g)
 	assignment.Apply()
 
-	g.watcher = NewGameEtcdWatcher(g.namespace)
+	g.watcher = NewGameEtcdWatcher(g.namespace, g.client)
 	return g
 }
 

@@ -20,7 +20,10 @@ func EClient() *clientv3.Client {
 }
 
 func NewWithOption(assignment option.Assignment) {
-	var err error
+	ecli = NewClientWithOption(assignment)
+}
+
+func NewClientWithOption(assignment option.Assignment) *clientv3.Client {
 
 	v3config := clientv3.Config{}
 	assignment.Target(&v3config)
@@ -32,9 +35,11 @@ func NewWithOption(assignment option.Assignment) {
 
 	assignment.Apply()
 
-	ecli, err = clientv3.New(v3config)
+	cli, err := clientv3.New(v3config)
 	if err != nil {
 		log.Fatal("[ETCD] client created error")
-		return
+		panic("[ETCD] client created error")
+		return nil
 	}
+	return cli
 }
