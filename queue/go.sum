@@ -1,0 +1,4 @@
+github.com/slclub/go-tips v0.0.9 h1:1Y88D9KL66RQZIQTAoWzWEbkp311esYNwkU6eiPymDw=
+github.com/slclub/go-tips v0.0.9/go.mod h1:3Xq36YcA1BHd5w02Tj4Qahvmx/u0SB8MlJ6+jULespM=
+github.com/streadway/amqp v1.1.0 h1:py12iX8XSyI7aN/3dUT8DFIDJazNJsVJdxNVEpnQTZM=
+github.com/streadway/amqp v1.1.0/go.mod h1:WYSrTEYHOXHd0nwFeUXAe2G2hRnQT+deZJJf88uS9Bg=
