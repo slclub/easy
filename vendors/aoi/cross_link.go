@@ -197,7 +197,7 @@ func (self *crossList) choose(entity Entity) *containerList {
 			used = i
 			continue
 		}
-		if cli.Rate() > cl.Rate() {
+		if cli.Rate() < cl.Rate() {
 			cli = cl
 			used = i
 		}

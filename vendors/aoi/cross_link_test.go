@@ -48,11 +48,11 @@ func recalue(obj *Object, i int) {
 }
 
 func testMockCrossMove(cross *crossList, entity Entity) {
-	log.Debug("-----Handle------- Move cross PID:%v POS:%v", entity.ID(), entity.Position())
+	//log.Debug("-----Handle------- Move cross PID:%v POS:%v", entity.ID(), entity.Position())
 	cross.DeleteCache(entity)
 	cross.Add(entity)
 	cross.RangeByRadiusAll(entity, func(other Entity, check int) {
-		log.Debug("RANGE PID:%v POS:%v O-PID:%v POS:%v check:%v", entity.ID(), entity.Position(), other.ID(), other.Position(), check)
+		//log.Debug("RANGE PID:%v POS:%v O-PID:%v POS:%v check:%v", entity.ID(), entity.Position(), other.ID(), other.Position(), check)
 	})
 }
 
