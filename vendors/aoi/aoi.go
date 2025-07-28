@@ -29,7 +29,7 @@ type AoiArea struct {
 func New(assignment option.Assignment) AOI {
 	a := &AoiArea{
 		option:       DefaultOption(),
-		chanMove:     make(chan *OperEvent),
+		chanMove:     make(chan *OperEvent, 20), // 接收的事件队列
 		countAgent:   0,
 		countMonster: 0,
 		countNpc:     0,
